@@ -10,16 +10,30 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
 <style>
-  html { background: #0B0A08; }
-  body { margin: 0; background: #0B0A08; color: #EDE8DC; -webkit-font-smoothing: antialiased; font-family: 'IBM Plex Mono', monospace; }
+  :root {
+    --bg: #0B0A08; --bg-rgb: 11,10,8;
+    --fg: #EDE8DC; --fg-rgb: 237,232,220;
+    --panel-rgb: 18,16,12;
+    --accent: #FF4D1C;
+    --vignette: rgba(0,0,0,0.55);
+  }
+  :root[data-theme="light"] {
+    --bg: #F3EFE4; --bg-rgb: 243,239,228;
+    --fg: #1C1811; --fg-rgb: 28,24,17;
+    --panel-rgb: 255,253,247;
+    --accent: #D2390A;
+    --vignette: rgba(40,30,10,0.06);
+  }
+  html { background: var(--bg); }
+  body { margin: 0; background: var(--bg); color: var(--fg); -webkit-font-smoothing: antialiased; font-family: 'IBM Plex Mono', monospace; }
   * { box-sizing: border-box; }
-  ::selection { background: #FF4D1C; color: #0B0A08; }
-  a { color: #EDE8DC; }
-  a:hover { color: #FF4D1C; }
+  ::selection { background: var(--accent); color: var(--bg); }
+  a { color: var(--fg); }
+  a:hover { color: var(--accent); }
   input { outline: none; }
-  input::placeholder { color: rgba(237,232,220,0.28); }
+  input::placeholder { color: rgba(var(--fg-rgb),0.28); }
   ::-webkit-scrollbar { width: 10px; }
-  ::-webkit-scrollbar-track { background: #0B0A08; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
   ::-webkit-scrollbar-thumb { background: #2a2620; border-radius: 0; }
   button { font-family: 'IBM Plex Mono', monospace; }
   @keyframes tf-spin { to { transform: rotate(360deg); } }
@@ -35,58 +49,60 @@
     [data-claim-row] > div:last-child { align-items: flex-start !important; }
     [data-pipeline-grid] { grid-template-columns: 1fr !important; }
   }
-  .btn-hover:hover { background: #FF4D1C !important; color: #0B0A08 !important; }
-  .btn-hover-inv:hover { background: #EDE8DC !important; color: #0B0A08 !important; }
+  .btn-hover:hover { background: var(--accent) !important; color: var(--bg) !important; }
+  .btn-hover-inv:hover { background: var(--fg) !important; color: var(--bg) !important; }
 </style>
+<script>try{document.documentElement.setAttribute('data-theme',localStorage.getItem('tf-theme')||'dark')}catch(e){}</script>
 </head>
 <body>
-<div style="background: #0B0A08; min-height: 100vh; overflow-x: hidden; position: relative;">
+<div style="background: var(--bg); min-height: 100vh; overflow-x: hidden; position: relative;">
   <!-- ambient grid + vignette -->
-  <div style="position: fixed; inset: 0; pointer-events: none; z-index: 0; background-image: linear-gradient(rgba(237,232,220,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(237,232,220,0.03) 1px, transparent 1px); background-size: 72px 72px;"></div>
-  <div style="position: fixed; inset: 0; pointer-events: none; z-index: 0; background: radial-gradient(ellipse 120% 90% at 50% 0%, transparent 55%, rgba(0,0,0,0.55) 100%);"></div>
+  <div style="position: fixed; inset: 0; pointer-events: none; z-index: 0; background-image: linear-gradient(rgba(var(--fg-rgb),0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(var(--fg-rgb),0.03) 1px, transparent 1px); background-size: 72px 72px;"></div>
+  <div style="position: fixed; inset: 0; pointer-events: none; z-index: 0; background: radial-gradient(ellipse 120% 90% at 50% 0%, transparent 55%, var(--vignette) 100%);"></div>
 
   <!-- NAV -->
-  <header style="position: fixed; top: 0; left: 0; right: 0; z-index: 50; display: flex; align-items: center; justify-content: space-between; padding: 0 clamp(16px, 3vw, 40px); height: 64px; border-bottom: 1px solid rgba(237,232,220,0.12); background: rgba(11,10,8,0.82); backdrop-filter: blur(12px);">
+  <header style="position: fixed; top: 0; left: 0; right: 0; z-index: 50; display: flex; align-items: center; justify-content: space-between; padding: 0 clamp(16px, 3vw, 40px); height: 64px; border-bottom: 1px solid rgba(var(--fg-rgb),0.12); background: rgba(var(--bg-rgb),0.82); backdrop-filter: blur(12px);">
     <div style="display: flex; align-items: center; gap: 14px;">
-      <div style="width: 12px; height: 12px; background: #FF4D1C; animation: tf-blink 2.4s steps(1) infinite;"></div>
+      <div style="width: 12px; height: 12px; background: var(--accent); animation: tf-blink 2.4s steps(1) infinite;"></div>
       <div style="font-size: 15px; font-weight: 600; letter-spacing: 0.22em;">TRUTHFEED</div>
-      <div style="font-size: 10px; letter-spacing: 0.18em; color: rgba(237,232,220,0.4); border: 1px solid rgba(237,232,220,0.18); padding: 3px 8px;">RITUAL · TESTNET</div>
+      <div style="font-size: 10px; letter-spacing: 0.18em; color: rgba(var(--fg-rgb),0.4); border: 1px solid rgba(var(--fg-rgb),0.18); padding: 3px 8px;">RITUAL · TESTNET</div>
     </div>
     <div style="display: flex; align-items: center; gap: 18px;">
-      <div style="font-size: 11px; color: rgba(237,232,220,0.45); letter-spacing: 0.1em; display: flex; gap: 8px; align-items: center;">
+      <div style="font-size: 11px; color: rgba(var(--fg-rgb),0.45); letter-spacing: 0.1em; display: flex; gap: 8px; align-items: center;">
         <span style="display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: #6FE3A0; animation: tf-pulse 1.8s ease-in-out infinite;"></span>
         <span id="blockReadout">BLOCK #·</span>
       </div>
-      <button id="connectBtn" data-magnetic class="btn-hover" style="font-size: 12px; font-weight: 600; letter-spacing: 0.14em; color: #0B0A08; background: #EDE8DC; border: none; padding: 11px 20px; cursor: pointer; transition: background 0.2s;">CONNECT WALLET</button>
+      <button id="themeBtn" title="Toggle light / dark" style="font-size: 13px; line-height: 1; color: var(--fg); background: transparent; border: 1px solid rgba(var(--fg-rgb),0.25); padding: 8px 11px; cursor: pointer;">☀</button>
+      <button id="connectBtn" data-magnetic class="btn-hover" style="font-size: 12px; font-weight: 600; letter-spacing: 0.14em; color: var(--bg); background: var(--fg); border: none; padding: 11px 20px; cursor: pointer; transition: background 0.2s;">CONNECT WALLET</button>
     </div>
   </header>
 
   <!-- HERO -->
   <section style="position: relative; z-index: 1; padding: clamp(130px, 16vh, 190px) clamp(16px, 4vw, 56px) 0;">
     <div style="max-width: 1400px; margin: 0 auto;">
-      <div style="display: flex; justify-content: space-between; gap: 24px; font-size: 11px; letter-spacing: 0.2em; color: rgba(237,232,220,0.45); border-top: 1px solid rgba(237,232,220,0.14); padding-top: 14px; flex-wrap: wrap;">
+      <div style="display: flex; justify-content: space-between; gap: 24px; font-size: 11px; letter-spacing: 0.2em; color: rgba(var(--fg-rgb),0.45); border-top: 1px solid rgba(var(--fg-rgb),0.14); padding-top: 14px; flex-wrap: wrap;">
         <span>PROTOCOL // ON-CHAIN TRUTH MACHINE</span>
         <span>ENCLAVE: SEALED · TEE-ATTESTED</span>
         <span>NO EDITS · NO BRIBES · NO BURIALS</span>
       </div>
       <h1 style="font-family: 'Instrument Serif', serif; font-weight: 400; font-size: clamp(56px, 10.5vw, 168px); line-height: 0.92; letter-spacing: -0.015em; margin: clamp(28px, 5vh, 56px) 0 0; text-transform: uppercase;">
         <span data-scramble style="display: block;">Every claim</span>
-        <span style="display: block;"><span data-scramble>stands </span><em data-scramble style="color: #FF4D1C; font-style: italic;">trial.</em></span>
+        <span style="display: block;"><span data-scramble>stands </span><em data-scramble style="color: var(--accent); font-style: italic;">trial.</em></span>
       </h1>
       <div style="display: flex; gap: clamp(24px, 5vw, 80px); align-items: flex-end; justify-content: space-between; margin-top: clamp(28px, 5vh, 52px); flex-wrap: wrap;">
-        <p style="max-width: 520px; font-size: clamp(13px, 1.2vw, 15px); line-height: 1.75; color: rgba(237,232,220,0.68); margin: 0;">Submit a rumor, a headline, a "fact." The machine hunts real evidence with the HTTP precompile, deliberates inside a sealed TEE via on-chain LLM inference, and carves its verdict onto Ritual Chain · permanently. Nobody can bribe it. Nobody can bury it.</p>
+        <p style="max-width: 520px; font-size: clamp(13px, 1.2vw, 15px); line-height: 1.75; color: rgba(var(--fg-rgb),0.68); margin: 0;">Submit a rumor, a headline, a "fact." The machine hunts real evidence with the HTTP precompile, deliberates inside a sealed TEE via on-chain LLM inference, and carves its verdict onto Ritual Chain · permanently. Nobody can bribe it. Nobody can bury it.</p>
         <div style="display: flex; gap: clamp(24px, 4vw, 64px); flex-wrap: wrap;">
           <div>
             <div id="statJudged" data-count style="font-family: 'Instrument Serif', serif; font-size: clamp(36px, 4vw, 60px); line-height: 1;">0</div>
-            <div style="font-size: 10px; letter-spacing: 0.22em; color: rgba(237,232,220,0.45); margin-top: 8px;">VERDICTS SEALED</div>
+            <div style="font-size: 10px; letter-spacing: 0.22em; color: rgba(var(--fg-rgb),0.45); margin-top: 8px;">VERDICTS SEALED</div>
           </div>
           <div>
-            <div style="display: flex; align-items: baseline;"><span id="statConfidence" data-count style="font-family: 'Instrument Serif', serif; font-size: clamp(36px, 4vw, 60px); line-height: 1;">0</span><span style="font-family: 'Instrument Serif', serif; font-size: clamp(20px, 2vw, 30px); color: rgba(237,232,220,0.5);">%</span></div>
-            <div style="font-size: 10px; letter-spacing: 0.22em; color: rgba(237,232,220,0.45); margin-top: 8px;">MEAN CONFIDENCE</div>
+            <div style="display: flex; align-items: baseline;"><span id="statConfidence" data-count style="font-family: 'Instrument Serif', serif; font-size: clamp(36px, 4vw, 60px); line-height: 1;">0</span><span style="font-family: 'Instrument Serif', serif; font-size: clamp(20px, 2vw, 30px); color: rgba(var(--fg-rgb),0.5);">%</span></div>
+            <div style="font-size: 10px; letter-spacing: 0.22em; color: rgba(var(--fg-rgb),0.45); margin-top: 8px;">MEAN CONFIDENCE</div>
           </div>
           <div>
             <div id="statCitations" data-count style="font-family: 'Instrument Serif', serif; font-size: clamp(36px, 4vw, 60px); line-height: 1;">0</div>
-            <div style="font-size: 10px; letter-spacing: 0.22em; color: rgba(237,232,220,0.45); margin-top: 8px;">CITATIONS FILED</div>
+            <div style="font-size: 10px; letter-spacing: 0.22em; color: rgba(var(--fg-rgb),0.45); margin-top: 8px;">CITATIONS FILED</div>
           </div>
         </div>
       </div>
@@ -94,23 +110,23 @@
   </section>
 
   <!-- TICKER -->
-  <div style="position: relative; z-index: 1; margin-top: clamp(40px, 8vh, 80px); border-top: 1px solid rgba(237,232,220,0.14); border-bottom: 1px solid rgba(237,232,220,0.14); overflow: hidden; background: rgba(18,16,12,0.6);">
+  <div style="position: relative; z-index: 1; margin-top: clamp(40px, 8vh, 80px); border-top: 1px solid rgba(var(--fg-rgb),0.14); border-bottom: 1px solid rgba(var(--fg-rgb),0.14); overflow: hidden; background: rgba(var(--panel-rgb),0.6);">
     <div style="display: flex; width: max-content; animation: tf-marquee 42s linear infinite; padding: 13px 0;">
-      <div id="ticker1" style="font-size: 12px; letter-spacing: 0.12em; color: rgba(237,232,220,0.6); white-space: nowrap; padding-right: 48px;"></div>
-      <div id="ticker2" style="font-size: 12px; letter-spacing: 0.12em; color: rgba(237,232,220,0.6); white-space: nowrap; padding-right: 48px;"></div>
+      <div id="ticker1" style="font-size: 12px; letter-spacing: 0.12em; color: rgba(var(--fg-rgb),0.6); white-space: nowrap; padding-right: 48px;"></div>
+      <div id="ticker2" style="font-size: 12px; letter-spacing: 0.12em; color: rgba(var(--fg-rgb),0.6); white-space: nowrap; padding-right: 48px;"></div>
     </div>
   </div>
 
   <!-- SUBMIT -->
   <section style="position: relative; z-index: 1; padding: clamp(64px, 12vh, 130px) clamp(16px, 4vw, 56px);">
     <div data-reveal style="max-width: 1000px; margin: 0 auto;">
-      <div style="font-size: 11px; letter-spacing: 0.24em; color: #FF4D1C; margin-bottom: 18px;">01 · FILE A CLAIM</div>
-      <div style="font-family: 'Instrument Serif', serif; font-size: clamp(30px, 4vw, 52px); line-height: 1.1; margin-bottom: 36px;">State your claim. <em style="color: rgba(237,232,220,0.5);">The machine will decide.</em></div>
-      <div style="display: flex; gap: 0; align-items: stretch; border: 1px solid rgba(237,232,220,0.22); background: rgba(18,16,12,0.7);">
-        <input id="claimInput" placeholder="e.g. “Octopuses have three hearts and blue blood.”" style="flex: 1; min-width: 0; background: transparent; border: none; color: #EDE8DC; font-family: 'IBM Plex Mono', monospace; font-size: clamp(13px, 1.3vw, 16px); padding: 22px clamp(14px, 2vw, 26px); letter-spacing: 0.02em;">
-        <button id="submitBtn" data-magnetic class="btn-hover-inv" style="font-size: 12px; font-weight: 600; letter-spacing: 0.16em; color: #0B0A08; background: #FF4D1C; border: none; padding: 0 clamp(18px, 3vw, 38px); cursor: pointer; white-space: nowrap; transition: background 0.2s;">SUBMIT FOR TRIAL ↗</button>
+      <div style="font-size: 11px; letter-spacing: 0.24em; color: var(--accent); margin-bottom: 18px;">01 · FILE A CLAIM</div>
+      <div style="font-family: 'Instrument Serif', serif; font-size: clamp(30px, 4vw, 52px); line-height: 1.1; margin-bottom: 36px;">State your claim. <em style="color: rgba(var(--fg-rgb),0.5);">The machine will decide.</em></div>
+      <div style="display: flex; gap: 0; align-items: stretch; border: 1px solid rgba(var(--fg-rgb),0.22); background: rgba(var(--panel-rgb),0.7);">
+        <input id="claimInput" placeholder="e.g. “Octopuses have three hearts and blue blood.”" style="flex: 1; min-width: 0; background: transparent; border: none; color: var(--fg); font-family: 'IBM Plex Mono', monospace; font-size: clamp(13px, 1.3vw, 16px); padding: 22px clamp(14px, 2vw, 26px); letter-spacing: 0.02em;">
+        <button id="submitBtn" data-magnetic class="btn-hover-inv" style="font-size: 12px; font-weight: 600; letter-spacing: 0.16em; color: var(--bg); background: var(--accent); border: none; padding: 0 clamp(18px, 3vw, 38px); cursor: pointer; white-space: nowrap; transition: background 0.2s;">SUBMIT FOR TRIAL ↗</button>
       </div>
-      <div style="display: flex; justify-content: space-between; margin-top: 12px; font-size: 10px; letter-spacing: 0.18em; color: rgba(237,232,220,0.38); flex-wrap: wrap; gap: 8px;">
+      <div style="display: flex; justify-content: space-between; margin-top: 12px; font-size: 10px; letter-spacing: 0.18em; color: rgba(var(--fg-rgb),0.38); flex-wrap: wrap; gap: 8px;">
         <span>FEES PAID FROM RITUALWALLET ESCROW · EVIDENCE KEPT ON-CHAIN</span>
         <span id="submitHint">CONNECT WALLET, THEN SUBMIT</span>
       </div>
@@ -120,9 +136,9 @@
   <!-- FEED -->
   <section style="position: relative; z-index: 1; padding: 0 clamp(16px, 4vw, 56px) clamp(80px, 12vh, 140px);">
     <div style="max-width: 1400px; margin: 0 auto;">
-      <div data-reveal style="display: flex; justify-content: space-between; align-items: baseline; border-bottom: 2px solid #EDE8DC; padding-bottom: 16px; flex-wrap: wrap; gap: 12px;">
+      <div data-reveal style="display: flex; justify-content: space-between; align-items: baseline; border-bottom: 2px solid var(--fg); padding-bottom: 16px; flex-wrap: wrap; gap: 12px;">
         <div style="display: flex; align-items: baseline; gap: 20px;">
-          <div style="font-size: 11px; letter-spacing: 0.24em; color: #FF4D1C;">02 · THE DOCKET</div>
+          <div style="font-size: 11px; letter-spacing: 0.24em; color: var(--accent);">02 · THE DOCKET</div>
           <div style="font-family: 'Instrument Serif', serif; font-size: clamp(26px, 3vw, 40px); line-height: 1;">Live verdict ledger</div>
         </div>
         <div style="display: flex; gap: 14px; font-size: 10px; letter-spacing: 0.14em; flex-wrap: wrap;">
@@ -130,7 +146,7 @@
           <span style="color: #FF5C5C;">■ FALSE</span>
           <span style="color: #F5C044;">■ MISLEADING</span>
           <span style="color: #9D97C9;">■ UNVERIFIABLE</span>
-          <span style="color: rgba(237,232,220,0.45);">■ PENDING</span>
+          <span style="color: rgba(var(--fg-rgb),0.45);">■ PENDING</span>
         </div>
       </div>
       <div id="feed"></div>
@@ -138,13 +154,13 @@
   </section>
 
   <!-- MANIFESTO -->
-  <section data-reveal style="position: relative; z-index: 1; border-top: 1px solid rgba(237,232,220,0.14); padding: clamp(64px, 12vh, 120px) clamp(16px, 4vw, 56px); text-align: center;">
-    <div style="font-family: 'Instrument Serif', serif; font-size: clamp(28px, 4.5vw, 64px); line-height: 1.15; max-width: 1000px; margin: 0 auto;">The verdict is not an opinion.<br><em style="color: #FF4D1C;">It is a record.</em></div>
-    <div style="font-size: 11px; letter-spacing: 0.24em; color: rgba(237,232,220,0.4); margin-top: 28px;">CARVED ON-CHAIN · BLOCK AFTER BLOCK · FOREVER</div>
+  <section data-reveal style="position: relative; z-index: 1; border-top: 1px solid rgba(var(--fg-rgb),0.14); padding: clamp(64px, 12vh, 120px) clamp(16px, 4vw, 56px); text-align: center;">
+    <div style="font-family: 'Instrument Serif', serif; font-size: clamp(28px, 4.5vw, 64px); line-height: 1.15; max-width: 1000px; margin: 0 auto;">The verdict is not an opinion.<br><em style="color: var(--accent);">It is a record.</em></div>
+    <div style="font-size: 11px; letter-spacing: 0.24em; color: rgba(var(--fg-rgb),0.4); margin-top: 28px;">CARVED ON-CHAIN · BLOCK AFTER BLOCK · FOREVER</div>
   </section>
 
   <!-- FOOTER -->
-  <footer style="position: relative; z-index: 1; border-top: 1px solid rgba(237,232,220,0.14); padding: 24px clamp(16px, 4vw, 56px); display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; font-size: 10px; letter-spacing: 0.18em; color: rgba(237,232,220,0.4);">
+  <footer style="position: relative; z-index: 1; border-top: 1px solid rgba(var(--fg-rgb),0.14); padding: 24px clamp(16px, 4vw, 56px); display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; font-size: 10px; letter-spacing: 0.18em; color: rgba(var(--fg-rgb),0.4);">
     <span>TRUTHFEED © 2026 · THE MACHINE TRIBUNAL</span>
     <span id="contractTag">CONTRACT: ·</span>
     <span id="blockReadout2">BLOCK #·</span>
@@ -153,41 +169,41 @@
   <!-- PIPELINE OVERLAY -->
   <div id="pipeline" style="display:none; position: fixed; inset: 0; z-index: 100; background: rgba(7,6,5,0.97); flex-direction: column; overflow-y: auto;">
     <div style="position: absolute; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, transparent, rgba(255,77,28,0.7), transparent); animation: tf-scanline 3.5s linear infinite; pointer-events: none;"></div>
-    <div style="display: flex; justify-content: space-between; align-items: center; padding: 20px clamp(16px, 3vw, 40px); border-bottom: 1px solid rgba(237,232,220,0.12); flex-shrink: 0;">
-      <div style="font-size: 11px; letter-spacing: 0.24em; color: #FF4D1C;">SECURE ENCLAVE // TRIAL IN SESSION</div>
-      <button id="pipeAbort" style="font-size: 11px; letter-spacing: 0.14em; color: rgba(237,232,220,0.5); background: transparent; border: 1px solid rgba(237,232,220,0.25); padding: 8px 16px; cursor: pointer;">ABORT ✕</button>
+    <div style="display: flex; justify-content: space-between; align-items: center; padding: 20px clamp(16px, 3vw, 40px); border-bottom: 1px solid rgba(var(--fg-rgb),0.12); flex-shrink: 0;">
+      <div style="font-size: 11px; letter-spacing: 0.24em; color: var(--accent);">SECURE ENCLAVE // TRIAL IN SESSION</div>
+      <button id="pipeAbort" style="font-size: 11px; letter-spacing: 0.14em; color: rgba(var(--fg-rgb),0.5); background: transparent; border: 1px solid rgba(var(--fg-rgb),0.25); padding: 8px 16px; cursor: pointer;">ABORT ✕</button>
     </div>
     <div data-pipeline-grid style="flex: 1; display: grid; grid-template-columns: minmax(220px, 320px) 1fr; gap: clamp(20px, 4vw, 60px); padding: clamp(24px, 4vh, 48px) clamp(16px, 3vw, 40px); max-width: 1300px; width: 100%; margin: 0 auto;">
       <div style="display: flex; flex-direction: column; gap: 4px;">
-        <div style="font-size: 10px; letter-spacing: 0.2em; color: rgba(237,232,220,0.4); margin-bottom: 14px;">PIPELINE</div>
+        <div style="font-size: 10px; letter-spacing: 0.2em; color: rgba(var(--fg-rgb),0.4); margin-bottom: 14px;">PIPELINE</div>
         <div id="pipeStages"></div>
-        <div style="margin-top: 22px; font-size: 10px; letter-spacing: 0.12em; color: rgba(237,232,220,0.4); line-height: 1.8; border-top: 1px solid rgba(237,232,220,0.12); padding-top: 14px;">CLAIM UNDER TRIAL:<br><span id="pipeClaim" style="color: rgba(237,232,220,0.75); font-style: italic; font-family: 'Instrument Serif', serif; font-size: 15px; letter-spacing: 0;"></span></div>
+        <div style="margin-top: 22px; font-size: 10px; letter-spacing: 0.12em; color: rgba(var(--fg-rgb),0.4); line-height: 1.8; border-top: 1px solid rgba(var(--fg-rgb),0.12); padding-top: 14px;">CLAIM UNDER TRIAL:<br><span id="pipeClaim" style="color: rgba(var(--fg-rgb),0.75); font-style: italic; font-family: 'Instrument Serif', serif; font-size: 15px; letter-spacing: 0;"></span></div>
       </div>
       <div style="display: flex; flex-direction: column; min-width: 0;">
         <div id="pipeDeliberating" style="display: flex; align-items: center; justify-content: center; padding: clamp(10px, 3vh, 30px) 0;">
           <div style="position: relative; width: clamp(180px, 26vh, 260px); height: clamp(180px, 26vh, 260px);">
             <div style="position: absolute; inset: 0; border: 1px dashed rgba(255,77,28,0.5); border-radius: 50%; animation: tf-spin 9s linear infinite;"></div>
-            <div style="position: absolute; inset: 14%; border: 1px solid rgba(237,232,220,0.2); border-top-color: #FF4D1C; border-radius: 50%; animation: tf-spin 1.6s linear infinite;"></div>
-            <div style="position: absolute; inset: 28%; border: 1px dashed rgba(237,232,220,0.3); border-radius: 50%; animation: tf-spin-rev 5s linear infinite;"></div>
+            <div style="position: absolute; inset: 14%; border: 1px solid rgba(var(--fg-rgb),0.2); border-top-color: var(--accent); border-radius: 50%; animation: tf-spin 1.6s linear infinite;"></div>
+            <div style="position: absolute; inset: 28%; border: 1px dashed rgba(var(--fg-rgb),0.3); border-radius: 50%; animation: tf-spin-rev 5s linear infinite;"></div>
             <div style="position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 8px;">
-              <div style="font-size: 22px; color: #FF4D1C;">⟡</div>
-              <div id="pipeStageWord" style="font-size: 10px; letter-spacing: 0.28em; color: rgba(237,232,220,0.65); text-align: center;"></div>
+              <div style="font-size: 22px; color: var(--accent);">⟡</div>
+              <div id="pipeStageWord" style="font-size: 10px; letter-spacing: 0.28em; color: rgba(var(--fg-rgb),0.65); text-align: center;"></div>
             </div>
           </div>
         </div>
         <div id="pipeVerdict" style="display:none; flex-direction: column; align-items: center; gap: 26px; padding: clamp(10px, 3vh, 30px) 0;">
-          <div id="pipeStamp" style="border: 4px double #EDE8DC; color: #EDE8DC; font-size: clamp(30px, 4.5vw, 58px); font-weight: 600; letter-spacing: 0.22em; padding: 20px 44px; background: rgba(11,10,8,0.7);"></div>
+          <div id="pipeStamp" style="border: 4px double var(--fg); color: var(--fg); font-size: clamp(30px, 4.5vw, 58px); font-weight: 600; letter-spacing: 0.22em; padding: 20px 44px; background: rgba(var(--bg-rgb),0.7);"></div>
           <div style="width: min(420px, 90%);">
-            <div style="display: flex; justify-content: space-between; font-size: 10px; letter-spacing: 0.16em; color: rgba(237,232,220,0.5); margin-bottom: 8px;">
-              <span>CONFIDENCE</span><span id="pipeConfLabel" style="color:#EDE8DC;">0%</span>
+            <div style="display: flex; justify-content: space-between; font-size: 10px; letter-spacing: 0.16em; color: rgba(var(--fg-rgb),0.5); margin-bottom: 8px;">
+              <span>CONFIDENCE</span><span id="pipeConfLabel" style="color:var(--fg);">0%</span>
             </div>
-            <div style="height: 8px; background: rgba(237,232,220,0.1);"><div id="pipeConfBar" style="height: 100%; width: 0%; background: #EDE8DC; transition: width 1.4s cubic-bezier(0.16,1,0.3,1);"></div></div>
+            <div style="height: 8px; background: rgba(var(--fg-rgb),0.1);"><div id="pipeConfBar" style="height: 100%; width: 0%; background: var(--fg); transition: width 1.4s cubic-bezier(0.16,1,0.3,1);"></div></div>
           </div>
-          <div id="pipeReasoning" style="font-size: 12px; line-height: 1.8; color: rgba(237,232,220,0.7); max-width: 560px; text-align: center;"></div>
-          <div id="pipeSeal" style="font-size: 10px; letter-spacing: 0.2em; color: #EDE8DC; border-top: 1px solid rgba(237,232,220,0.15); border-bottom: 1px solid rgba(237,232,220,0.15); padding: 12px 24px;"></div>
-          <button id="pipeReturn" data-magnetic class="btn-hover" style="font-size: 12px; font-weight: 600; letter-spacing: 0.16em; color: #0B0A08; background: #EDE8DC; border: none; padding: 14px 30px; cursor: pointer; transition: background 0.2s;">RETURN TO DOCKET</button>
+          <div id="pipeReasoning" style="font-size: 12px; line-height: 1.8; color: rgba(var(--fg-rgb),0.7); max-width: 560px; text-align: center;"></div>
+          <div id="pipeSeal" style="font-size: 10px; letter-spacing: 0.2em; color: var(--fg); border-top: 1px solid rgba(var(--fg-rgb),0.15); border-bottom: 1px solid rgba(var(--fg-rgb),0.15); padding: 12px 24px;"></div>
+          <button id="pipeReturn" data-magnetic class="btn-hover" style="font-size: 12px; font-weight: 600; letter-spacing: 0.16em; color: var(--bg); background: var(--fg); border: none; padding: 14px 30px; cursor: pointer; transition: background 0.2s;">RETURN TO DOCKET</button>
         </div>
-        <div style="margin-top: auto; border: 1px solid rgba(237,232,220,0.14); background: rgba(11,10,8,0.8); padding: 16px 18px; height: 168px; overflow: hidden; display: flex; flex-direction: column-reverse;">
+        <div style="margin-top: auto; border: 1px solid rgba(var(--fg-rgb),0.14); background: rgba(var(--bg-rgb),0.8); padding: 16px 18px; height: 168px; overflow: hidden; display: flex; flex-direction: column-reverse;">
           <div id="pipeLogs"></div>
         </div>
       </div>
@@ -249,7 +265,7 @@ const REGISTRY_ABI = [{
 const $ = (id) => document.getElementById(id);
 const esc = (s) => String(s).replace(/[&<>"']/g, m => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[m]));
 const short = (a) => a ? a.slice(0, 6) + '…' + a.slice(-4) : '';
-const dim = 'rgba(237,232,220,0.55)', green = '#6FE3A0', orange = '#FF4D1C', red = '#FF5C5C';
+const dim = 'rgba(var(--fg-rgb),0.55)', green = '#6FE3A0', orange = 'var(--accent)', red = '#FF5C5C';
 
 let state = { provider: null, account: null, wallet: null, claims: [], block: 0n };
 let hint = (t) => { $('submitHint').textContent = t; };
@@ -371,9 +387,9 @@ function closePipeline() { $('pipeline').style.display = 'none'; }
 function renderStages() {
   $('pipeStages').innerHTML = STAGE_LABELS.map((label, i) => {
     const done = i < pStage, active = i === pStage;
-    const iconColor = done ? green : active ? orange : 'rgba(237,232,220,0.3)';
-    const textColor = active ? '#EDE8DC' : done ? 'rgba(237,232,220,0.7)' : 'rgba(237,232,220,0.35)';
-    const border = active ? 'rgba(255,77,28,0.6)' : 'rgba(237,232,220,0.12)';
+    const iconColor = done ? green : active ? orange : 'rgba(var(--fg-rgb),0.3)';
+    const textColor = active ? 'var(--fg)' : done ? 'rgba(var(--fg-rgb),0.7)' : 'rgba(var(--fg-rgb),0.35)';
+    const border = active ? 'rgba(255,77,28,0.6)' : 'rgba(var(--fg-rgb),0.12)';
     const bg = active ? 'rgba(255,77,28,0.08)' : 'transparent';
     const icon = done ? '✓' : active ? '◉' : '○';
     return `<div style="display:flex;align-items:center;gap:12px;padding:13px 14px;border:1px solid ${border};background:${bg};transition:all 0.4s;">
@@ -389,7 +405,7 @@ function log(text, color = dim) {
   $('pipeLogs').appendChild(d);
 }
 function revealVerdict(v) {
-  const theme = THEME[v.label] || { color: '#EDE8DC', glow: 'transparent' };
+  const theme = THEME[v.label] || { color: 'var(--fg)', glow: 'transparent' };
   $('pipeDeliberating').style.display = 'none';
   const stamp = $('pipeStamp');
   stamp.textContent = v.label; stamp.style.color = theme.color; stamp.style.borderColor = theme.color;
@@ -454,34 +470,34 @@ async function runVerification(id) {
 function cardHtml(c) {
   const idx = String(c.id).padStart(2, '0');
   const verified = c.stage >= 3;
-  const theme = THEME[c.label] || { color: 'rgba(237,232,220,0.5)', glow: 'transparent' };
+  const theme = THEME[c.label] || { color: 'rgba(var(--fg-rgb),0.5)', glow: 'transparent' };
   const blockTag = verified ? 'JUDGED · ON-CHAIN' : (c.stage === 2 ? 'EVIDENCE ON RECORD' : 'MEMPOOL');
   let right, body = '';
   if (verified) {
-    const cites = (c.citations || []).map((label, n) => `<span style="font-size:10px;letter-spacing:0.08em;color:rgba(237,232,220,0.5);border:1px solid rgba(237,232,220,0.16);padding:5px 10px;">[${n + 1}] ${esc(label)}</span>`).join('');
-    body = `<div style="font-size:12px;line-height:1.7;color:rgba(237,232,220,0.62);max-width:640px;margin-bottom:14px;"><span style="color:${theme.color};">REASONING // </span>${esc(c.reasoning)}</div>
+    const cites = (c.citations || []).map((label, n) => `<span style="font-size:10px;letter-spacing:0.08em;color:rgba(var(--fg-rgb),0.5);border:1px solid rgba(var(--fg-rgb),0.16);padding:5px 10px;">[${n + 1}] ${esc(label)}</span>`).join('');
+    body = `<div style="font-size:12px;line-height:1.7;color:rgba(var(--fg-rgb),0.62);max-width:640px;margin-bottom:14px;"><span style="color:${theme.color};">REASONING // </span>${esc(c.reasoning)}</div>
       <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
         ${c.sourceUrl ? `<a href="${esc(c.sourceUrl)}" target="_blank" rel="noopener" style="font-size:10px;letter-spacing:0.1em;text-decoration:none;border:1px solid ${theme.color};color:${theme.color};padding:5px 10px;">PRIMARY SOURCE ↗</a>` : ''}
         ${cites}</div>`;
-    right = `<div style="border:3px double ${theme.color};color:${theme.color};font-size:clamp(16px,1.5vw,22px);font-weight:600;letter-spacing:0.2em;padding:12px 22px;transform:rotate(-8deg);background:rgba(11,10,8,0.6);box-shadow:0 0 32px ${theme.glow};">${c.label}</div>
+    right = `<div style="border:3px double ${theme.color};color:${theme.color};font-size:clamp(16px,1.5vw,22px);font-weight:600;letter-spacing:0.2em;padding:12px 22px;transform:rotate(-8deg);background:rgba(var(--bg-rgb),0.6);box-shadow:0 0 32px ${theme.glow};">${c.label}</div>
       <div style="width:100%;max-width:220px;">
-        <div style="display:flex;justify-content:space-between;font-size:10px;letter-spacing:0.14em;color:rgba(237,232,220,0.5);margin-bottom:6px;"><span>CONFIDENCE</span><span style="color:${theme.color};">${c.confidence}%</span></div>
-        <div style="height:6px;background:rgba(237,232,220,0.1);overflow:hidden;"><div class="meter" data-w="${c.confidence}" style="height:100%;width:0%;background:${theme.color};transition:width 1.4s cubic-bezier(0.16,1,0.3,1);"></div></div>
+        <div style="display:flex;justify-content:space-between;font-size:10px;letter-spacing:0.14em;color:rgba(var(--fg-rgb),0.5);margin-bottom:6px;"><span>CONFIDENCE</span><span style="color:${theme.color};">${c.confidence}%</span></div>
+        <div style="height:6px;background:rgba(var(--fg-rgb),0.1);overflow:hidden;"><div class="meter" data-w="${c.confidence}" style="height:100%;width:0%;background:${theme.color};transition:width 1.4s cubic-bezier(0.16,1,0.3,1);"></div></div>
       </div>`;
   } else {
-    const runBtn = state.account ? `<button data-run="${c.id}" data-magnetic class="btn-hover" style="font-size:11px;font-weight:600;letter-spacing:0.16em;color:#FF4D1C;background:transparent;border:1px solid #FF4D1C;padding:12px 22px;cursor:pointer;transition:all 0.2s;">⟡ RUN VERIFICATION</button>` : '';
+    const runBtn = state.account ? `<button data-run="${c.id}" data-magnetic class="btn-hover" style="font-size:11px;font-weight:600;letter-spacing:0.16em;color:var(--accent);background:transparent;border:1px solid var(--accent);padding:12px 22px;cursor:pointer;transition:all 0.2s;">⟡ RUN VERIFICATION</button>` : '';
     body = `<div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;">
-        <div style="font-size:11px;letter-spacing:0.16em;color:rgba(237,232,220,0.5);display:flex;align-items:center;gap:10px;">
-          <span style="display:inline-block;width:8px;height:8px;border:1px solid rgba(237,232,220,0.5);animation:tf-spin 3s linear infinite;"></span>
+        <div style="font-size:11px;letter-spacing:0.16em;color:rgba(var(--fg-rgb),0.5);display:flex;align-items:center;gap:10px;">
+          <span style="display:inline-block;width:8px;height:8px;border:1px solid rgba(var(--fg-rgb),0.5);animation:tf-spin 3s linear infinite;"></span>
           ${c.stage === 2 ? 'EVIDENCE GATHERED · AWAITING VERDICT' : 'AWAITING TRIAL · EVIDENCE NOT YET GATHERED'}</div>
         ${runBtn}</div>`;
-    right = `<div style="border:1px dashed rgba(237,232,220,0.35);color:rgba(237,232,220,0.45);font-size:clamp(14px,1.3vw,18px);letter-spacing:0.2em;padding:12px 22px;transform:rotate(-8deg);animation:tf-pulse 2.2s ease-in-out infinite;">PENDING</div>`;
+    right = `<div style="border:1px dashed rgba(var(--fg-rgb),0.35);color:rgba(var(--fg-rgb),0.45);font-size:clamp(14px,1.3vw,18px);letter-spacing:0.2em;padding:12px 22px;transform:rotate(-8deg);animation:tf-pulse 2.2s ease-in-out infinite;">PENDING</div>`;
   }
-  return `<article data-reveal data-claim-row style="border-bottom:1px solid rgba(237,232,220,0.14);padding:clamp(24px,3vw,40px) 0;display:grid;grid-template-columns:minmax(90px,140px) 1fr minmax(200px,260px);gap:clamp(16px,3vw,48px);align-items:start;">
+  return `<article data-reveal data-claim-row style="border-bottom:1px solid rgba(var(--fg-rgb),0.14);padding:clamp(24px,3vw,40px) 0;display:grid;grid-template-columns:minmax(90px,140px) 1fr minmax(200px,260px);gap:clamp(16px,3vw,48px);align-items:start;">
     <div style="display:flex;flex-direction:column;gap:10px;">
-      <div style="font-family:'Instrument Serif',serif;font-size:clamp(26px,2.6vw,38px);color:rgba(237,232,220,0.35);line-height:1;">${idx}</div>
-      <div style="font-size:9px;letter-spacing:0.12em;color:rgba(237,232,220,0.35);line-height:1.7;">${blockTag}</div>
-      <div style="font-size:9px;letter-spacing:0.12em;color:rgba(237,232,220,0.35);">BY ${short(c.author)}</div>
+      <div style="font-family:'Instrument Serif',serif;font-size:clamp(26px,2.6vw,38px);color:rgba(var(--fg-rgb),0.35);line-height:1;">${idx}</div>
+      <div style="font-size:9px;letter-spacing:0.12em;color:rgba(var(--fg-rgb),0.35);line-height:1.7;">${blockTag}</div>
+      <div style="font-size:9px;letter-spacing:0.12em;color:rgba(var(--fg-rgb),0.35);">BY ${short(c.author)}</div>
     </div>
     <div style="min-width:0;">
       <div style="font-family:'Instrument Serif',serif;font-size:clamp(20px,2.2vw,30px);line-height:1.25;margin-bottom:14px;">“${esc(c.text)}”</div>
@@ -494,7 +510,7 @@ function cardHtml(c) {
 function render() {
   const claims = [...state.claims].sort((a, b) => b.id - a.id);
   $('feed').innerHTML = claims.length ? claims.map(cardHtml).join('')
-    : '<div style="padding:60px 0;color:rgba(237,232,220,0.4);font-size:12px;letter-spacing:0.14em;">NO CLAIMS ON THE DOCKET YET · FILE THE FIRST.</div>';
+    : '<div style="padding:60px 0;color:rgba(var(--fg-rgb),0.4);font-size:12px;letter-spacing:0.14em;">NO CLAIMS ON THE DOCKET YET · FILE THE FIRST.</div>';
   // stats
   const verified = state.claims.filter(c => c.stage >= 3);
   const avg = verified.length ? Math.round(verified.reduce((a, c) => a + c.confidence, 0) / verified.length) : 0;
@@ -567,6 +583,15 @@ async function tickBlock() {
 }
 
 // ---------- boot ----------
+const root = document.documentElement;
+function setTheme(t) {
+  root.setAttribute('data-theme', t);
+  try { localStorage.setItem('tf-theme', t); } catch (e) {}
+  $('themeBtn').textContent = t === 'light' ? '☾' : '☀';
+}
+setTheme(root.getAttribute('data-theme') || 'dark');
+$('themeBtn').onclick = () => setTheme(root.getAttribute('data-theme') === 'light' ? 'dark' : 'light');
+
 $('connectBtn').onclick = connect;
 $('submitBtn').onclick = submit;
 $('claimInput').addEventListener('keydown', (e) => { if (e.key === 'Enter') submit(); });

@@ -280,8 +280,14 @@ async function runCheck(id) {
       { role: 'system', content: 'You are TruthFeed, a rigorous fact-checker. Judge the CLAIM using ONLY the provided EVIDENCE. Reply with exactly one JSON object and nothing else: {"verdict":"TRUE|MISLEADING|FALSE|UNVERIFIABLE","confidence":0-100,"reasoning":"one or two sentences","citations":["short source refs"]}. If the evidence does not settle the claim, use "UNVERIFIABLE".' },
       { role: 'user', content: `CLAIM:\n${c2[6]}\n\nEVIDENCE (raw source JSON from ${c2[7]}):\n${c2[8]}` },
     ];
-    const h2 = await state.wallet.writeContract({ address: cfg.address, abi: ABI, functionName: 'judgeClaim', args: [BigInt(id), llmEx, JSON.stringify(messages), 300n, 4096n], gas: 6000000n, ...FEES });
-    await waitTx(h2);
+    const h2 = await state.wallet.writeContract({ address: cfg.address, abi: ABI, functionName: 'judgeClaim', args: [BigInt(id), llmEx, JSON.stringify(messages), 480n, 4096n], gas: 6000000n, ...FEES });
+    try {
+      await waitTx(h2, 220000);
+    } catch {
+      setStatus(`#${id}: LLM executor is busy/unavailable right now — evidence is saved, hit “Run AI check” again to retry the verdict.`, true);
+      load();
+      return;
+    }
     setStatus(`#${id}: verdict stored on-chain.`);
     load();
     renderWallet();

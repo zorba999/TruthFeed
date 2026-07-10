@@ -103,10 +103,22 @@ async function judge(id) {
     },
   ];
   const messagesJson = JSON.stringify(messages);
-  const hash = await wc('judgeClaim', [BigInt(id), executor, messagesJson, 300n, 4096n], { gas: 6_000_000n });
-  console.log('judge tx:', hash, '\nwaiting for async settlement (LLM inference in TEE, ~5-60s)...');
-  const receipt = await publicClient.waitForTransactionReceipt({ hash, timeout: 300_000, pollingInterval: 3_000 });
-  console.log('judge settled:', receipt.status);
+  // Only ONE LLM executor is registered on testnet and it can be flaky, so retry:
+  // if the async job expires (no settlement within ttl), resubmit.
+  const attempts = 5;
+  for (let a = 1; a <= attempts; a++) {
+    const hash = await wc('judgeClaim', [BigInt(id), executor, messagesJson, 480n, 4096n], { gas: 6_000_000n });
+    console.log(`judge tx (attempt ${a}/${attempts}):`, hash, '\nwaiting for async settlement (LLM inference in TEE)...');
+    try {
+      const receipt = await publicClient.waitForTransactionReceipt({ hash, timeout: 200_000, pollingInterval: 3_000 });
+      console.log('judge settled:', receipt.status);
+      const c = await readClaim(id, false);
+      if (Number(c.stage) >= 3) return;
+    } catch {
+      console.log('  no settlement (LLM executor busy/unavailable) — retrying...');
+    }
+  }
+  console.log('LLM executor did not settle after', attempts, 'attempts. Try again later.');
 }
 
 async function readClaim(id, print = true) {

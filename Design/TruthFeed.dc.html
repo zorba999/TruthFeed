@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <title>TruthFeed — The Machine Tribunal</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous">
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+  <style>
+    html { background: #0B0A08; }
+    body { margin: 0; background: #0B0A08; color: #EDE8DC; -webkit-font-smoothing: antialiased; }
+    * { box-sizing: border-box; }
+    ::selection { background: #FF4D1C; color: #0B0A08; }
+    a { color: #EDE8DC; }
+    a:hover { color: #FF4D1C; }
+    input { outline: none; }
+    input::placeholder { color: rgba(237,232,220,0.28); }
+    ::-webkit-scrollbar { width: 10px; }
+    ::-webkit-scrollbar-track { background: #0B0A08; }
+    ::-webkit-scrollbar-thumb { background: #2a2620; border-radius: 0; }
+    @keyframes tf-spin { to { transform: rotate(360deg); } }
+    @keyframes tf-spin-rev { to { transform: rotate(-360deg); } }
+    @keyframes tf-pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.25; } }
+    @keyframes tf-marquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+    @keyframes tf-stamp { 0% { transform: scale(2.6) rotate(-14deg); opacity: 0; } 55% { transform: scale(0.94) rotate(-7deg); opacity: 1; } 75% { transform: scale(1.05) rotate(-8.5deg); } 100% { transform: scale(1) rotate(-8deg); opacity: 1; } }
+    @keyframes tf-scanline { from { top: -10%; } to { top: 110%; } }
+    @keyframes tf-blink { 0%,100% { opacity: 1; } 50% { opacity: 0; } }
+    @keyframes tf-carve { from { clip-path: inset(0 100% 0 0); } to { clip-path: inset(0 0% 0 0); } }
+    @media (max-width: 860px) {
+      [data-claim-row] { grid-template-columns: 1fr !important; }
+      [data-claim-row] > div:last-child { align-items: flex-start !important; }
+      [data-pipeline-grid] { grid-template-columns: 1fr !important; }
+    }
+  </style>
+</helmet>
+
+<div style="font-family: 'IBM Plex Mono', monospace; background: #0B0A08; min-height: 100vh; overflow-x: hidden; position: relative;">
+
+  <!-- ambient grid + vignette -->
+  <div style="position: fixed; inset: 0; pointer-events: none; z-index: 0; background-image: linear-gradient(rgba(237,232,220,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(237,232,220,0.03) 1px, transparent 1px); background-size: 72px 72px;"></div>
+  <div style="position: fixed; inset: 0; pointer-events: none; z-index: 0; background: radial-gradient(ellipse 120% 90% at 50% 0%, transparent 55%, rgba(0,0,0,0.55) 100%);"></div>
+
+  <!-- ================= NAV ================= -->
+  <header style="position: fixed; top: 0; left: 0; right: 0; z-index: 50; display: flex; align-items: center; justify-content: space-between; padding: 0 clamp(16px, 3vw, 40px); height: 64px; border-bottom: 1px solid rgba(237,232,220,0.12); background: rgba(11,10,8,0.82); backdrop-filter: blur(12px);">
+    <div style="display: flex; align-items: center; gap: 14px;">
+      <div style="width: 12px; height: 12px; background: #FF4D1C; animation: tf-blink 2.4s steps(1) infinite;"></div>
+      <div style="font-size: 15px; font-weight: 600; letter-spacing: 0.22em;">TRUTHFEED</div>
+      <div style="font-size: 10px; letter-spacing: 0.18em; color: rgba(237,232,220,0.4); border: 1px solid rgba(237,232,220,0.18); padding: 3px 8px;">MAINNET · LIVE</div>
+    </div>
+    <div style="display: flex; align-items: center; gap: 18px;">
+      <div style="font-size: 11px; color: rgba(237,232,220,0.45); letter-spacing: 0.1em; display: flex; gap: 8px; align-items: center;">
+        <span style="display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: #6FE3A0; animation: tf-pulse 1.8s ease-in-out infinite;"></span>
+        <span>{{ blockReadout }}</span>
+      </div>
+      <button data-magnetic="1" onClick="{{ connectWallet }}" style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; font-weight: 600; letter-spacing: 0.14em; color: #0B0A08; background: #EDE8DC; border: none; padding: 11px 20px; cursor: pointer; transition: background 0.2s;" style-hover="background: #FF4D1C; color: #0B0A08;">{{ walletLabel }}</button>
+    </div>
+  </header>
+
+  <!-- ================= HERO ================= -->
+  <section data-screen-label="Hero" style="position: relative; z-index: 1; padding: clamp(130px, 16vh, 190px) clamp(16px, 4vw, 56px) 0;">
+    <div style="max-width: 1400px; margin: 0 auto;">
+      <div style="display: flex; justify-content: space-between; gap: 24px; font-size: 11px; letter-spacing: 0.2em; color: rgba(237,232,220,0.45); border-top: 1px solid rgba(237,232,220,0.14); padding-top: 14px; flex-wrap: wrap;">
+        <span>PROTOCOL // ON-CHAIN TRUTH MACHINE</span>
+        <span>ENCLAVE: SEALED · TEE-ATTESTED</span>
+        <span>NO EDITS · NO BRIBES · NO BURIALS</span>
+      </div>
+
+      <h1 style="font-family: 'Instrument Serif', serif; font-weight: 400; font-size: clamp(56px, 10.5vw, 168px); line-height: 0.92; letter-spacing: -0.015em; margin: clamp(28px, 5vh, 56px) 0 0; text-transform: uppercase;">
+        <span data-scramble="1" style="display: block;">Every claim</span>
+        <span style="display: block;"><span data-scramble="1">stands </span><em data-scramble="1" style="color: #FF4D1C; font-style: italic;">trial.</em></span>
+      </h1>
+
+      <div style="display: flex; gap: clamp(24px, 5vw, 80px); align-items: flex-end; justify-content: space-between; margin-top: clamp(28px, 5vh, 52px); flex-wrap: wrap;">
+        <p style="max-width: 520px; font-size: clamp(13px, 1.2vw, 15px); line-height: 1.75; color: rgba(237,232,220,0.68); margin: 0;">Submit a rumor, a headline, a "fact." The machine hunts real evidence, deliberates inside a sealed AI enclave, and carves its verdict onto the chain — permanently. Nobody can bribe it. Nobody can bury it.</p>
+        <div style="display: flex; gap: clamp(24px, 4vw, 64px); flex-wrap: wrap;">
+          <div>
+            <div data-count="1" style="font-family: 'Instrument Serif', serif; font-size: clamp(36px, 4vw, 60px); line-height: 1;">{{ statJudged }}</div>
+            <div style="font-size: 10px; letter-spacing: 0.22em; color: rgba(237,232,220,0.45); margin-top: 8px;">VERDICTS SEALED</div>
+          </div>
+          <div>
+            <div style="display: flex; align-items: baseline;"><span data-count="1" style="font-family: 'Instrument Serif', serif; font-size: clamp(36px, 4vw, 60px); line-height: 1;">{{ statConfidence }}</span><span style="font-family: 'Instrument Serif', serif; font-size: clamp(20px, 2vw, 30px); color: rgba(237,232,220,0.5);">%</span></div>
+            <div style="font-size: 10px; letter-spacing: 0.22em; color: rgba(237,232,220,0.45); margin-top: 8px;">MEAN CONFIDENCE</div>
+          </div>
+          <div>
+            <div data-count="1" style="font-family: 'Instrument Serif', serif; font-size: clamp(36px, 4vw, 60px); line-height: 1;">{{ statCitations }}</div>
+            <div style="font-size: 10px; letter-spacing: 0.22em; color: rgba(237,232,220,0.45); margin-top: 8px;">CITATIONS FILED</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= TICKER ================= -->
+  <div style="position: relative; z-index: 1; margin-top: clamp(40px, 8vh, 80px); border-top: 1px solid rgba(237,232,220,0.14); border-bottom: 1px solid rgba(237,232,220,0.14); overflow: hidden; background: rgba(18,16,12,0.6);">
+    <div style="display: flex; width: max-content; animation: tf-marquee 42s linear infinite; padding: 13px 0;">
+      <div style="font-size: 12px; letter-spacing: 0.12em; color: rgba(237,232,220,0.6); white-space: nowrap; padding-right: 48px;">{{ tickerText }}</div>
+      <div style="font-size: 12px; letter-spacing: 0.12em; color: rgba(237,232,220,0.6); white-space: nowrap; padding-right: 48px;">{{ tickerText }}</div>
+    </div>
+  </div>
+
+  <!-- ================= SUBMIT ================= -->
+  <section data-screen-label="Submit a claim" style="position: relative; z-index: 1; padding: clamp(64px, 12vh, 130px) clamp(16px, 4vw, 56px);">
+    <div data-reveal="1" style="max-width: 1000px; margin: 0 auto;">
+      <div style="font-size: 11px; letter-spacing: 0.24em; color: #FF4D1C; margin-bottom: 18px;">01 — FILE A CLAIM</div>
+      <div style="font-family: 'Instrument Serif', serif; font-size: clamp(30px, 4vw, 52px); line-height: 1.1; margin-bottom: 36px;">State your claim. <em style="color: rgba(237,232,220,0.5);">The machine will decide.</em></div>
+      <div style="display: flex; gap: 0; align-items: stretch; border: 1px solid rgba(237,232,220,0.22); background: rgba(18,16,12,0.7);">
+        <input value="{{ inputValue }}" onChange="{{ onInput }}" onKeyDown="{{ onInputKey }}" placeholder="e.g. “Octopuses have three hearts and blue blood.”" style="flex: 1; min-width: 0; background: transparent; border: none; color: #EDE8DC; font-family: 'IBM Plex Mono', monospace; font-size: clamp(13px, 1.3vw, 16px); padding: 22px clamp(14px, 2vw, 26px); letter-spacing: 0.02em;">
+        <button data-magnetic="1" onClick="{{ submitClaim }}" style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; font-weight: 600; letter-spacing: 0.16em; color: #0B0A08; background: #FF4D1C; border: none; padding: 0 clamp(18px, 3vw, 38px); cursor: pointer; white-space: nowrap; transition: background 0.2s;" style-hover="background: #EDE8DC;">SUBMIT FOR TRIAL ↗</button>
+      </div>
+      <div style="display: flex; justify-content: space-between; margin-top: 12px; font-size: 10px; letter-spacing: 0.18em; color: rgba(237,232,220,0.38); flex-wrap: wrap; gap: 8px;">
+        <span>FEE: 0.002 ETH · REFUNDED IF UNVERIFIABLE</span>
+        <span>{{ submitHint }}</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= FEED ================= -->
+  <section data-screen-label="Verdict feed" style="position: relative; z-index: 1; padding: 0 clamp(16px, 4vw, 56px) clamp(80px, 12vh, 140px);">
+    <div style="max-width: 1400px; margin: 0 auto;">
+      <div data-reveal="1" style="display: flex; justify-content: space-between; align-items: baseline; border-bottom: 2px solid #EDE8DC; padding-bottom: 16px; margin-bottom: 0; flex-wrap: wrap; gap: 12px;">
+        <div style="display: flex; align-items: baseline; gap: 20px;">
+          <div style="font-size: 11px; letter-spacing: 0.24em; color: #FF4D1C;">02 — THE DOCKET</div>
+          <div style="font-family: 'Instrument Serif', serif; font-size: clamp(26px, 3vw, 40px); line-height: 1;">Live verdict ledger</div>
+        </div>
+        <div style="display: flex; gap: 14px; font-size: 10px; letter-spacing: 0.14em; flex-wrap: wrap;">
+          <span style="color: #6FE3A0;">■ TRUE</span>
+          <span style="color: #FF5C5C;">■ FALSE</span>
+          <span style="color: #F5C044;">■ MISLEADING</span>
+          <span style="color: #9D97C9;">■ UNVERIFIABLE</span>
+          <span style="color: rgba(237,232,220,0.45);">■ PENDING</span>
+        </div>
+      </div>
+
+      <sc-for list="{{ claims }}" as="c" hint-placeholder-count="4">
+        <article data-reveal="1" data-claim-row="1" data-screen-label="Verdict card" style="border-bottom: 1px solid rgba(237,232,220,0.14); padding: clamp(24px, 3vw, 40px) 0; display: grid; grid-template-columns: minmax(90px, 140px) 1fr minmax(200px, 260px); gap: clamp(16px, 3vw, 48px); align-items: start; position: relative;">
+
+          <!-- index / meta -->
+          <div style="display: flex; flex-direction: column; gap: 10px;">
+            <div style="font-family: 'Instrument Serif', serif; font-size: clamp(26px, 2.6vw, 38px); color: rgba(237,232,220,0.35); line-height: 1;">{{ c.indexLabel }}</div>
+            <div style="font-size: 9px; letter-spacing: 0.12em; color: rgba(237,232,220,0.35); word-break: break-all; line-height: 1.7;">{{ c.blockTag }}</div>
+            <div style="font-size: 9px; letter-spacing: 0.12em; color: rgba(237,232,220,0.35);">BY {{ c.author }}</div>
+          </div>
+
+          <!-- claim body -->
+          <div style="min-width: 0;">
+            <div style="font-family: 'Instrument Serif', serif; font-size: clamp(20px, 2.2vw, 30px); line-height: 1.25; margin-bottom: 14px;">“{{ c.claimText }}”</div>
+            <sc-if value="{{ c.isVerified }}" hint-placeholder-val="{{ true }}">
+              <div style="font-size: 12px; line-height: 1.7; color: rgba(237,232,220,0.62); max-width: 640px; margin-bottom: 14px;"><span style="color: {{ c.color }};">REASONING // </span>{{ c.reasoning }}</div>
+              <div style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center;">
+                <a href="{{ c.sourceUrl }}" target="_blank" rel="noopener" style="font-size: 10px; letter-spacing: 0.1em; text-decoration: none; border: 1px solid {{ c.color }}; color: {{ c.color }}; padding: 5px 10px; transition: all 0.2s;" style-hover="background: {{ c.color }}; color: #0B0A08;">PRIMARY SOURCE ↗</a>
+                <sc-for list="{{ c.citationList }}" as="cite" hint-placeholder-count="2">
+                  <span style="font-size: 10px; letter-spacing: 0.08em; color: rgba(237,232,220,0.5); border: 1px solid rgba(237,232,220,0.16); padding: 5px 10px;">[{{ cite.n }}] {{ cite.label }}</span>
+                </sc-for>
+              </div>
+            </sc-if>
+            <sc-if value="{{ c.isPending }}" hint-placeholder-val="{{ false }}">
+              <div style="display: flex; align-items: center; gap: 16px; flex-wrap: wrap;">
+                <div style="font-size: 11px; letter-spacing: 0.16em; color: rgba(237,232,220,0.5); display: flex; align-items: center; gap: 10px;">
+                  <span style="display: inline-block; width: 8px; height: 8px; border: 1px solid rgba(237,232,220,0.5); animation: tf-spin 3s linear infinite;"></span>
+                  AWAITING TRIAL — EVIDENCE NOT YET GATHERED
+                </div>
+                <button data-magnetic="1" onClick="{{ c.onVerify }}" style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; font-weight: 600; letter-spacing: 0.16em; color: #FF4D1C; background: transparent; border: 1px solid #FF4D1C; padding: 12px 22px; cursor: pointer; transition: all 0.2s;" style-hover="background: #FF4D1C; color: #0B0A08;">⟡ RUN VERIFICATION</button>
+              </div>
+            </sc-if>
+          </div>
+
+          <!-- verdict stamp + confidence -->
+          <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 16px;">
+            <sc-if value="{{ c.isVerified }}" hint-placeholder-val="{{ true }}">
+              <div style="border: 3px double {{ c.color }}; color: {{ c.color }}; font-size: clamp(16px, 1.5vw, 22px); font-weight: 600; letter-spacing: 0.2em; padding: 12px 22px; transform: rotate(-8deg); background: rgba(11,10,8,0.6); box-shadow: 0 0 32px {{ c.glow }};">{{ c.verdict }}</div>
+              <div style="width: 100%; max-width: 220px;">
+                <div style="display: flex; justify-content: space-between; font-size: 10px; letter-spacing: 0.14em; color: rgba(237,232,220,0.5); margin-bottom: 6px;">
+                  <span>CONFIDENCE</span><span style="color: {{ c.color }};">{{ c.confidenceLabel }}</span>
+                </div>
+                <div style="height: 6px; background: rgba(237,232,220,0.1); overflow: hidden;">
+                  <div data-meter="{{ c.confidence }}" style="height: 100%; width: {{ c.meterWidth }}; background: {{ c.color }}; transition: width 1.4s cubic-bezier(0.16,1,0.3,1);"></div>
+                </div>
+              </div>
+            </sc-if>
+            <sc-if value="{{ c.isPending }}" hint-placeholder-val="{{ false }}">
+              <div style="border: 1px dashed rgba(237,232,220,0.35); color: rgba(237,232,220,0.45); font-size: clamp(14px, 1.3vw, 18px); letter-spacing: 0.2em; padding: 12px 22px; transform: rotate(-8deg); animation: tf-pulse 2.2s ease-in-out infinite;">PENDING</div>
+            </sc-if>
+          </div>
+        </article>
+      </sc-for>
+    </div>
+  </section>
+
+  <!-- ================= MANIFESTO STRIP ================= -->
+  <section data-reveal="1" style="position: relative; z-index: 1; border-top: 1px solid rgba(237,232,220,0.14); padding: clamp(64px, 12vh, 120px) clamp(16px, 4vw, 56px); text-align: center;">
+    <div style="font-family: 'Instrument Serif', serif; font-size: clamp(28px, 4.5vw, 64px); line-height: 1.15; max-width: 1000px; margin: 0 auto;">The verdict is not an opinion.<br><em style="color: #FF4D1C;">It is a record.</em></div>
+    <div style="font-size: 11px; letter-spacing: 0.24em; color: rgba(237,232,220,0.4); margin-top: 28px;">CARVED ON-CHAIN · BLOCK AFTER BLOCK · FOREVER</div>
+  </section>
+
+  <!-- ================= FOOTER ================= -->
+  <footer style="position: relative; z-index: 1; border-top: 1px solid rgba(237,232,220,0.14); padding: 24px clamp(16px, 4vw, 56px); display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; font-size: 10px; letter-spacing: 0.18em; color: rgba(237,232,220,0.4);">
+    <span>TRUTHFEED © 2026 — THE MACHINE TRIBUNAL</span>
+    <span>ENCLAVE ATTESTATION: 0x9F2C…D41A</span>
+    <span>{{ blockReadout }}</span>
+  </footer>
+
+  <!-- ================= VERIFICATION PIPELINE OVERLAY ================= -->
+  <sc-if value="{{ pipelineOpen }}" hint-placeholder-val="{{ false }}">
+    <div data-screen-label="Verification enclave" style="position: fixed; inset: 0; z-index: 100; background: rgba(7,6,5,0.97); display: flex; flex-direction: column; overflow-y: auto;">
+      <!-- scanline -->
+      <div style="position: absolute; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, transparent, rgba(255,77,28,0.7), transparent); animation: tf-scanline 3.5s linear infinite; pointer-events: none;"></div>
+
+      <div style="display: flex; justify-content: space-between; align-items: center; padding: 20px clamp(16px, 3vw, 40px); border-bottom: 1px solid rgba(237,232,220,0.12); flex-shrink: 0;">
+        <div style="font-size: 11px; letter-spacing: 0.24em; color: #FF4D1C;">SECURE ENCLAVE // TRIAL IN SESSION</div>
+        <button onClick="{{ closePipeline }}" style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.14em; color: rgba(237,232,220,0.5); background: transparent; border: 1px solid rgba(237,232,220,0.25); padding: 8px 16px; cursor: pointer; transition: all 0.2s;" style-hover="color: #EDE8DC; border-color: #EDE8DC;">ABORT ✕</button>
+      </div>
+
+      <div data-pipeline-grid="1" style="flex: 1; display: grid; grid-template-columns: minmax(220px, 320px) 1fr; gap: clamp(20px, 4vw, 60px); padding: clamp(24px, 4vh, 48px) clamp(16px, 3vw, 40px); max-width: 1300px; width: 100%; margin: 0 auto;">
+
+        <!-- stage tracker -->
+        <div style="display: flex; flex-direction: column; gap: 4px;">
+          <div style="font-size: 10px; letter-spacing: 0.2em; color: rgba(237,232,220,0.4); margin-bottom: 14px;">PIPELINE</div>
+          <sc-for list="{{ pipelineStages }}" as="st" hint-placeholder-count="4">
+            <div style="display: flex; align-items: center; gap: 12px; padding: 13px 14px; border: 1px solid {{ st.borderColor }}; background: {{ st.bg }}; opacity: {{ st.opacity }}; transition: all 0.4s;">
+              <span style="font-size: 10px; color: {{ st.iconColor }}; width: 14px; text-align: center;">{{ st.icon }}</span>
+              <span style="font-size: 11px; letter-spacing: 0.14em; color: {{ st.textColor }};">{{ st.label }}</span>
+            </div>
+          </sc-for>
+          <div style="margin-top: 22px; font-size: 10px; letter-spacing: 0.12em; color: rgba(237,232,220,0.4); line-height: 1.8; border-top: 1px solid rgba(237,232,220,0.12); padding-top: 14px;">CLAIM UNDER TRIAL:<br><span style="color: rgba(237,232,220,0.75); font-style: italic; font-family: 'Instrument Serif', serif; font-size: 15px; letter-spacing: 0;">“{{ pipelineClaimText }}”</span></div>
+        </div>
+
+        <!-- enclave stage / reveal -->
+        <div style="display: flex; flex-direction: column; min-width: 0;">
+          <sc-if value="{{ pipelineDeliberating }}" hint-placeholder-val="{{ true }}">
+            <div style="display: flex; align-items: center; justify-content: center; padding: clamp(10px, 3vh, 30px) 0;">
+              <div style="position: relative; width: clamp(180px, 26vh, 260px); height: clamp(180px, 26vh, 260px);">
+                <div style="position: absolute; inset: 0; border: 1px dashed rgba(255,77,28,0.5); border-radius: 50%; animation: tf-spin 9s linear infinite;"></div>
+                <div style="position: absolute; inset: 14%; border: 1px solid rgba(237,232,220,0.2); border-top-color: #FF4D1C; border-radius: 50%; animation: tf-spin 1.6s linear infinite;"></div>
+                <div style="position: absolute; inset: 28%; border: 1px dashed rgba(237,232,220,0.3); border-radius: 50%; animation: tf-spin-rev 5s linear infinite;"></div>
+                <div style="position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 8px;">
+                  <div style="font-size: 22px; color: #FF4D1C;">⟡</div>
+                  <div data-stage-word="1" style="font-size: 10px; letter-spacing: 0.28em; color: rgba(237,232,220,0.65); text-align: center;">{{ pipelineStageWord }}</div>
+                </div>
+              </div>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ pipelineVerdict }}" hint-placeholder-val="{{ false }}">
+            <div style="display: flex; flex-direction: column; align-items: center; gap: 26px; padding: clamp(10px, 3vh, 30px) 0;">
+              <div style="border: 4px double {{ pipelineColor }}; color: {{ pipelineColor }}; font-size: clamp(30px, 4.5vw, 58px); font-weight: 600; letter-spacing: 0.22em; padding: 20px 44px; animation: tf-stamp 0.7s cubic-bezier(0.16,1,0.3,1) both; box-shadow: 0 0 70px {{ pipelineGlow }}; background: rgba(11,10,8,0.7);">{{ pipelineVerdictLabel }}</div>
+              <div style="width: min(420px, 90%);">
+                <div style="display: flex; justify-content: space-between; font-size: 10px; letter-spacing: 0.16em; color: rgba(237,232,220,0.5); margin-bottom: 8px;">
+                  <span>CONFIDENCE</span><span style="color: {{ pipelineColor }};">{{ pipelineConfLabel }}</span>
+                </div>
+                <div style="height: 8px; background: rgba(237,232,220,0.1);">
+                  <div style="height: 100%; width: {{ pipelineConfWidth }}; background: {{ pipelineColor }};"></div>
+                </div>
+              </div>
+              <div style="font-size: 12px; line-height: 1.8; color: rgba(237,232,220,0.7); max-width: 560px; text-align: center;">{{ pipelineReasoning }}</div>
+              <div style="font-size: 10px; letter-spacing: 0.2em; color: {{ pipelineColor }}; border-top: 1px solid rgba(237,232,220,0.15); border-bottom: 1px solid rgba(237,232,220,0.15); padding: 12px 24px; animation: tf-carve 1.2s ease-out both; animation-delay: 0.6s;">⛓ SEALED PERMANENTLY — {{ pipelineSealTag }}</div>
+              <button data-magnetic="1" onClick="{{ closePipeline }}" style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; font-weight: 600; letter-spacing: 0.16em; color: #0B0A08; background: #EDE8DC; border: none; padding: 14px 30px; cursor: pointer; transition: background 0.2s;" style-hover="background: #FF4D1C;">RETURN TO DOCKET</button>
+            </div>
+          </sc-if>
+
+          <!-- log console -->
+          <div style="margin-top: auto; border: 1px solid rgba(237,232,220,0.14); background: rgba(11,10,8,0.8); padding: 16px 18px; height: 168px; overflow: hidden; display: flex; flex-direction: column-reverse;">
+            <div>
+              <sc-for list="{{ pipelineLogs }}" as="ln" hint-placeholder-count="3">
+                <div style="font-size: 11px; line-height: 1.9; color: {{ ln.color }}; letter-spacing: 0.04em;">{{ ln.text }}</div>
+              </sc-for>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;: {&quot;width&quot;: &quot;100%&quot;, &quot;height&quot;: 900}, &quot;reducedMotion&quot;: {&quot;editor&quot;: &quot;boolean&quot;, &quot;default&quot;: false, &quot;tsType&quot;: &quot;boolean&quot;, &quot;section&quot;: &quot;Motion&quot;}, &quot;pipelineSpeed&quot;: {&quot;editor&quot;: &quot;range&quot;, &quot;default&quot;: 1, &quot;min&quot;: 0.5, &quot;max&quot;: 3, &quot;step&quot;: 0.25, &quot;unit&quot;: &quot;x&quot;, &quot;tsType&quot;: &quot;number&quot;, &quot;section&quot;: &quot;Motion&quot;}}">
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    // ============================================================
+    // SINGLE DATA MODEL — swap this for live chain data later.
+    // Claim: { id, claimText, verdict, confidence, reasoning,
+    //          sourceUrl, citations[], status, author }
+    // verdict: 'TRUE' | 'FALSE' | 'MISLEADING' | 'UNVERIFIABLE' | null
+    // status: 'verified' | 'pending'
+    // ============================================================
+    this.MOCK_CLAIMS = [
+      { id: 'c-0007', claimText: 'A leaked memo shows the city council voted in secret to sell the harbor to a private fund.', verdict: null, confidence: 0, reasoning: '', sourceUrl: '', citations: [], status: 'pending', author: '0x3fA9…c21B' },
+      { id: 'c-0006', claimText: 'The Amazon rainforest produces 20% of the world\u2019s oxygen.', verdict: 'MISLEADING', confidence: 88, reasoning: 'The Amazon generates roughly 6\u20139% of atmospheric oxygen and consumes nearly all of it through respiration \u2014 its net contribution is close to zero. The 20% figure is a persistent misquote.', sourceUrl: 'https://www.nationalgeographic.com/environment/article/why-amazon-doesnt-produce-20-percent-worlds-oxygen', citations: ['Nat Geo, 2019', 'Malhi et al., Yale E360'], status: 'verified', author: '0x81De…4A0f' },
+      { id: 'c-0005', claimText: 'El Salvador holds more than 6,000 BTC in its national reserve.', verdict: 'TRUE', confidence: 96, reasoning: 'The national bitcoin office publishes a live proof-of-reserves address; on-chain balance has exceeded 6,000 BTC since late 2024 and remains verifiable block by block.', sourceUrl: 'https://bitcoin.gob.sv', citations: ['ONBTC reserve address', 'mempool.space attestation'], status: 'verified', author: '0xB042…9E77' },
+      { id: 'c-0004', claimText: 'The Great Wall of China is visible to the naked eye from the Moon.', verdict: 'FALSE', confidence: 99, reasoning: 'At lunar distance the Wall subtends an angle far below human visual acuity \u2014 equivalent to seeing a human hair from 3 km away. Astronaut testimony and optics both refute it.', sourceUrl: 'https://www.nasa.gov/vision/space/workinginspace/great_wall.html', citations: ['NASA, 2005', 'Yang Liwei, CNSA debrief'], status: 'verified', author: '0x5C11…f83D' },
+      { id: 'c-0003', claimText: 'A private lab in Reykjav\u00edk achieved room-temperature superconductivity last month.', verdict: 'UNVERIFIABLE', confidence: 34, reasoning: 'No preprint, dataset, or independent replication exists. The only trace is a deleted social post and one uncorroborated blog. Insufficient evidence to rule in either direction.', sourceUrl: 'https://arxiv.org/list/cond-mat.supr-con/recent', citations: ['arXiv search: no match', 'Replication registry: empty'], status: 'verified', author: '0xEe20…11C4' },
+      { id: 'c-0002', claimText: 'Global electric vehicle sales exceeded 17 million units in 2024.', verdict: 'TRUE', confidence: 93, reasoning: 'IEA Global EV Outlook records ~17.3M electric cars sold in 2024, a 25% year-over-year rise, corroborated by registration data across the three largest markets.', sourceUrl: 'https://www.iea.org/reports/global-ev-outlook-2025', citations: ['IEA GEVO 2025', 'EV-Volumes registry'], status: 'verified', author: '0x77aB…0D6e' },
+    ];
+    this.THEME = {
+      'TRUE':         { color: '#6FE3A0', glow: 'rgba(111,227,160,0.25)' },
+      'FALSE':        { color: '#FF5C5C', glow: 'rgba(255,92,92,0.25)' },
+      'MISLEADING':   { color: '#F5C044', glow: 'rgba(245,192,68,0.25)' },
+      'UNVERIFIABLE': { color: '#9D97C9', glow: 'rgba(157,151,201,0.25)' },
+    };
+    this.STAGE_LABELS = ['TRANSMITTING CLAIM', 'FETCHING EVIDENCE', 'ENCLAVE DELIBERATION', 'VERDICT SEALED'];
+    this.state = {
+      claims: this.MOCK_CLAIMS.map(c => Object.assign({}, c)),
+      wallet: null,
+      input: '',
+      submitHint: 'PRESS ENTER OR SUBMIT',
+      block: 21473082,
+      metersOn: false,
+      pipeline: null, // { claimId, stage, logs:[], verdict:null, conf:0, done:false }
+    };
+    this._timers = [];
+  }
+
+  // ---------- lifecycle ----------
+  componentDidMount() {
+    this._blockTimer = setInterval(() => this.setState(s => ({ block: s.block + 1 })), 4200);
+    const wait = () => {
+      if (window.gsap && window.ScrollTrigger) this.initMotion();
+      else this._timers.push(setTimeout(wait, 120));
+    };
+    wait();
+    this._timers.push(setTimeout(() => this.setState({ metersOn: true }), 600));
+  }
+  componentWillUnmount() {
+    clearInterval(this._blockTimer);
+    this._timers.forEach(t => clearTimeout(t));
+    if (window.gsap) window.gsap.globalTimeline.clear();
+  }
+
+  reduced() { return !!(this.props.reducedMotion ?? false); }
+  speed() { return Number(this.props.pipelineSpeed ?? 1) || 1; }
+
+  initMotion() {
+    const gsap = window.gsap;
+    gsap.registerPlugin(window.ScrollTrigger);
+    if (this.reduced()) return;
+    // text scramble on hero
+    document.querySelectorAll('[data-scramble]').forEach((el, i) => this.scramble(el, 0.15 + i * 0.28));
+    // counters
+    document.querySelectorAll('[data-count]').forEach(el => {
+      const target = parseFloat((el.textContent || '0').replace(/[^0-9.]/g, '')) || 0;
+      const proxy = { v: 0 };
+      gsap.to(proxy, { v: target, duration: 1.8, delay: 0.5, ease: 'power3.out',
+        onUpdate: () => { el.textContent = Math.round(proxy.v).toLocaleString(); },
+        onComplete: () => { el.textContent = Math.round(target).toLocaleString(); } });
+    });
+    // scroll reveals
+    gsap.utils.toArray('[data-reveal]').forEach(el => {
+      gsap.from(el, { y: 44, opacity: 0, duration: 0.9, ease: 'power3.out',
+        scrollTrigger: { trigger: el, start: 'top 88%', once: true } });
+    });
+    // magnetic buttons
+    document.querySelectorAll('[data-magnetic]').forEach(btn => {
+      btn.addEventListener('mousemove', e => {
+        const r = btn.getBoundingClientRect();
+        gsap.to(btn, { x: (e.clientX - r.left - r.width / 2) * 0.25, y: (e.clientY - r.top - r.height / 2) * 0.35, duration: 0.3 });
+      });
+      btn.addEventListener('mouseleave', () => gsap.to(btn, { x: 0, y: 0, duration: 0.5, ease: 'elastic.out(1,0.4)' }));
+    });
+  }
+
+  scramble(el, delay) {
+    const finalText = el.textContent;
+    const chars = '█▓▒░ABCDEF0123456789#$%&';
+    let frame = 0;
+    const total = 24;
+    const tick = () => {
+      frame++;
+      const progress = frame / total;
+      el.textContent = finalText.split('').map((ch, i) =>
+        (ch === ' ' || i / finalText.length < progress) ? ch : chars[(Math.random() * chars.length) | 0]
+      ).join('');
+      if (frame < total) this._timers.push(setTimeout(tick, 42));
+      else el.textContent = finalText;
+    };
+    this._timers.push(setTimeout(tick, delay * 1000));
+  }
+
+  // ---------- actions ----------
+  connectWallet() {
+    if (this.state.wallet) { this.setState({ wallet: null }); return; }
+    const hex = '0123456789abcdef';
+    const rand = n => Array.from({ length: n }, () => hex[(Math.random() * 16) | 0]).join('');
+    this.setState({ wallet: '0x' + rand(4) + '\u2026' + rand(4) });
+  }
+
+  submitClaim() {
+    const text = this.state.input.trim();
+    if (!text) { this.setState({ submitHint: '\u26A0 A CLAIM CANNOT BE EMPTY' }); return; }
+    const id = 'c-' + String(1000 + ((Math.random() * 9000) | 0));
+    const author = this.state.wallet || '0xANON\u2026GUEST';
+    const claim = { id, claimText: text, verdict: null, confidence: 0, reasoning: '', sourceUrl: '', citations: [], status: 'pending', author };
+    this.setState(s => ({ claims: [claim, ...s.claims], input: '', submitHint: '\u2713 FILED \u2014 DOCKET #' + id.toUpperCase() }));
+  }
+
+  runVerification(claimId) {
+    const claim = this.state.claims.find(c => c.id === claimId);
+    if (!claim) return;
+    this.setState({ pipeline: { claimId, stage: 0, logs: [], verdict: null, conf: 0 } });
+    const sp = 1 / this.speed();
+    const push = (text, color, at) => this._timers.push(setTimeout(() => {
+      this.setState(s => s.pipeline ? { pipeline: Object.assign({}, s.pipeline, { logs: [...s.pipeline.logs, { text, color }] }) } : null);
+    }, at * 1000 * sp));
+    const stageAt = (stage, at) => this._timers.push(setTimeout(() => {
+      this.setState(s => s.pipeline ? { pipeline: Object.assign({}, s.pipeline, { stage }) } : null);
+    }, at * 1000 * sp));
+
+    const dim = 'rgba(237,232,220,0.55)';
+    push('> claim ' + claimId + ' received \u2014 hashing payload\u2026', dim, 0.2);
+    push('> keccak256: 0x' + Math.random().toString(16).slice(2, 10) + '\u2026 broadcast to mempool', dim, 1.0);
+    stageAt(1, 1.6);
+    push('> spawning evidence crawlers [8 workers]', dim, 1.9);
+    push('> 14 sources retrieved \u00b7 6 primary \u00b7 3 contradictory', dim, 2.9);
+    push('> cross-referencing archives + registries\u2026', dim, 3.7);
+    stageAt(2, 4.4);
+    push('> entering sealed enclave \u2014 attestation OK', '#FF4D1C', 4.6);
+    push('> external I/O severed \u00b7 deliberation in progress', '#FF4D1C', 5.4);
+    push('> weighing evidence: corroboration 0.31 \u00b7 provenance 0.22', dim, 6.4);
+
+    // verdict decision
+    const result = this.decideVerdict(claim);
+    this._timers.push(setTimeout(() => {
+      stageAt(3, 0);
+      this.setState(s => {
+        if (!s.pipeline) return null;
+        const claims = s.claims.map(c => c.id === claimId ? Object.assign({}, c, result, { status: 'verified' }) : c);
+        return { claims, pipeline: Object.assign({}, s.pipeline, { stage: 3, verdict: result.verdict, conf: 0, reasoning: result.reasoning }) };
+      });
+      // confidence count-up
+      if (window.gsap && !this.reduced()) {
+        const proxy = { v: 0 };
+        window.gsap.to(proxy, { v: result.confidence, duration: 1.6, delay: 0.5, ease: 'power3.out',
+          onUpdate: () => this.setState(s => s.pipeline ? { pipeline: Object.assign({}, s.pipeline, { conf: Math.round(proxy.v) }) } : null) });
+      } else {
+        this.setState(s => s.pipeline ? { pipeline: Object.assign({}, s.pipeline, { conf: result.confidence }) } : null);
+      }
+      this._timers.push(setTimeout(() => {
+        this.setState(s => s.pipeline ? { pipeline: Object.assign({}, s.pipeline, { logs: [...s.pipeline.logs, { text: '> verdict carved at block #' + s.block.toLocaleString() + ' \u2014 immutable', color: '#6FE3A0' }] }) } : null);
+      }, 1200));
+    }, 7400 * sp));
+  }
+
+  decideVerdict(claim) {
+    // Canonical mock outcome for the seeded pending claim; heuristic otherwise.
+    if (claim.id === 'c-0007') {
+      return { verdict: 'MISLEADING', confidence: 71,
+        reasoning: 'Council minutes confirm a closed-session vote occurred, but it authorized a feasibility study \u2014 not a sale. The "leaked memo" is a draft mislabeled by its distributor.',
+        sourceUrl: 'https://example.gov/council/minutes/2026-06', citations: ['Council minutes 06/2026', 'Harbor authority filing'] };
+    }
+    const pool = [
+      { verdict: 'UNVERIFIABLE', confidence: 42, reasoning: 'Retrieved sources neither corroborate nor refute the claim; no primary evidence found within the crawl horizon. The record remains open for re-trial as evidence emerges.' },
+      { verdict: 'TRUE', confidence: 87, reasoning: 'Multiple independent primary sources corroborate the claim with no substantive contradiction found in the evidence set.' },
+      { verdict: 'FALSE', confidence: 91, reasoning: 'Primary evidence directly contradicts the claim; the strongest supporting source traces back to a single uncorroborated repost.' },
+      { verdict: 'MISLEADING', confidence: 76, reasoning: 'A kernel of the claim is accurate, but its framing omits decisive context that reverses the takeaway.' },
+    ];
+    const pick = pool[(Math.random() * pool.length) | 0];
+    return Object.assign({}, pick, { sourceUrl: 'https://example.org/evidence', citations: ['Crawl bundle A', 'Registry snapshot'] });
+  }
+
+  closePipeline() { this.setState({ pipeline: null }); }
+
+  // ---------- render values ----------
+  renderVals() {
+    const s = this.state;
+    const verified = s.claims.filter(c => c.status === 'verified');
+    const avgConf = verified.length ? Math.round(verified.reduce((a, c) => a + c.confidence, 0) / verified.length) : 0;
+    const totalCites = verified.reduce((a, c) => a + c.citations.length, 0);
+
+    const claims = s.claims.map((c, i) => {
+      const theme = this.THEME[c.verdict] || { color: 'rgba(237,232,220,0.5)', glow: 'transparent' };
+      return {
+        claimText: c.claimText,
+        author: c.author,
+        verdict: c.verdict || 'PENDING',
+        reasoning: c.reasoning,
+        sourceUrl: c.sourceUrl,
+        isVerified: c.status === 'verified',
+        isPending: c.status === 'pending',
+        indexLabel: String(s.claims.length - i).padStart(2, '0'),
+        blockTag: c.status === 'verified' ? 'BLK #' + (s.block - (i + 1) * 137).toLocaleString() : 'MEMPOOL',
+        color: theme.color,
+        glow: theme.glow,
+        confidence: c.confidence,
+        confidenceLabel: c.confidence + '%',
+        meterWidth: (s.metersOn ? c.confidence : 0) + '%',
+        citationList: c.citations.map((label, n) => ({ label, n: n + 1 })),
+        onVerify: () => this.runVerification(c.id),
+      };
+    });
+
+    const p = s.pipeline;
+    const pTheme = p && p.verdict ? this.THEME[p.verdict] : null;
+    const pClaim = p ? s.claims.find(c => c.id === p.claimId) : null;
+    const stages = p ? this.STAGE_LABELS.map((label, i) => {
+      const done = i < p.stage, active = i === p.stage;
+      return {
+        label,
+        icon: done ? '\u2713' : active ? '\u25C9' : '\u25CB',
+        iconColor: done ? '#6FE3A0' : active ? '#FF4D1C' : 'rgba(237,232,220,0.3)',
+        textColor: active ? '#EDE8DC' : done ? 'rgba(237,232,220,0.7)' : 'rgba(237,232,220,0.35)',
+        borderColor: active ? 'rgba(255,77,28,0.6)' : 'rgba(237,232,220,0.12)',
+        bg: active ? 'rgba(255,77,28,0.08)' : 'transparent',
+        opacity: 1,
+      };
+    }) : [];
+
+    return {
+      // nav / hero
+      walletLabel: s.wallet ? '\u25C6 ' + s.wallet : 'CONNECT WALLET',
+      connectWallet: () => this.connectWallet(),
+      blockReadout: 'BLOCK #' + s.block.toLocaleString(),
+      statJudged: verified.length.toLocaleString(),
+      statConfidence: String(avgConf),
+      statCitations: String(totalCites),
+      tickerText: s.claims.map(c => (c.verdict || 'PENDING') + ' \u00b7 \u201C' + c.claimText + '\u201D \u00b7 ' + (c.status === 'verified' ? c.confidence + '% CONF' : 'IN MEMPOOL') + '  \u2014\u2014  ').join(''),
+      // submit
+      inputValue: s.input,
+      onInput: e => this.setState({ input: e.target.value }),
+      onInputKey: e => { if (e.key === 'Enter') this.submitClaim(); },
+      submitClaim: () => this.submitClaim(),
+      submitHint: s.submitHint,
+      // feed
+      claims,
+      // pipeline
+      pipelineOpen: !!p,
+      pipelineStages: stages,
+      pipelineClaimText: pClaim ? pClaim.claimText : '',
+      pipelineDeliberating: !!p && !p.verdict,
+      pipelineStageWord: p ? this.STAGE_LABELS[Math.min(p.stage, 2)] : '',
+      pipelineLogs: p ? p.logs : [],
+      pipelineVerdict: !!(p && p.verdict),
+      pipelineVerdictLabel: p && p.verdict ? p.verdict : '',
+      pipelineColor: pTheme ? pTheme.color : '#EDE8DC',
+      pipelineGlow: pTheme ? pTheme.glow : 'transparent',
+      pipelineConfLabel: p ? p.conf + '%' : '0%',
+      pipelineConfWidth: p ? p.conf + '%' : '0%',
+      pipelineReasoning: p && p.reasoning ? 'REASONING // ' + p.reasoning : '',
+      pipelineSealTag: 'BLOCK #' + s.block.toLocaleString() + ' \u00b7 TX 0x' + 'f3a1c9d2',
+      closePipeline: () => this.closePipeline(),
+    };
+  }
+}
+</script>
+</body>
+</html>

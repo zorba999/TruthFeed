@@ -1,0 +1,23 @@
+{
+  "name": "truthfeed",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "TruthFeed — on-chain, TEE-attested claim/news verifier on Ritual Chain",
+  "scripts": {
+    "compile": "node scripts/compile.mjs",
+    "deploy": "node scripts/deploy.mjs",
+    "verify-net": "node scripts/rpctest.mjs",
+    "submit": "node scripts/interact.mjs submit",
+    "fetch": "node scripts/interact.mjs fetch",
+    "judge": "node scripts/interact.mjs judge",
+    "run-all": "node scripts/interact.mjs all",
+    "read": "node scripts/interact.mjs read",
+    "web": "node scripts/serve.mjs"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "solc": "0.8.24",
+    "viem": "^2.21.0"
+  }
+}

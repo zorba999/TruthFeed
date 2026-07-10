@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>TruthFeed — on-chain fact-checker on Ritual</title>
+<style>
+  :root {
+    --bg: #0b0e14; --card: #151a24; --line: #232a38; --fg: #e6e9ef; --muted: #8b95a7;
+    --true: #2ecc71; --false: #e74c3c; --mis: #f39c12; --unv: #7f8c9a; --accent: #7c5cff;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--fg); font: 15px/1.5 system-ui, "Segoe UI", Roboto, sans-serif; }
+  header { padding: 28px 20px; border-bottom: 1px solid var(--line); }
+  h1 { margin: 0; font-size: 22px; }
+  h1 span { color: var(--accent); }
+  .sub { color: var(--muted); margin-top: 6px; font-size: 13px; }
+  main { max-width: 820px; margin: 0 auto; padding: 20px; }
+  .submit { display: flex; gap: 8px; margin-bottom: 22px; }
+  .submit input { flex: 1; background: var(--card); border: 1px solid var(--line); color: var(--fg); padding: 11px 13px; border-radius: 10px; }
+  .submit button, .btn { background: var(--accent); color: #fff; border: 0; padding: 11px 16px; border-radius: 10px; cursor: pointer; font-weight: 600; }
+  .btn.ghost { background: transparent; border: 1px solid var(--line); color: var(--muted); }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 16px 18px; margin-bottom: 14px; }
+  .claim { font-size: 16px; font-weight: 600; margin-bottom: 10px; }
+  .badge { display: inline-block; padding: 3px 10px; border-radius: 999px; font-size: 12px; font-weight: 700; letter-spacing: .3px; }
+  .b-TRUE { background: rgba(46,204,113,.15); color: var(--true); }
+  .b-FALSE { background: rgba(231,76,60,.15); color: var(--false); }
+  .b-MISLEADING { background: rgba(243,156,18,.15); color: var(--mis); }
+  .b-UNVERIFIABLE, .b-PENDING { background: rgba(127,140,154,.15); color: var(--unv); }
+  .reason { margin-top: 10px; color: var(--fg); }
+  .meta { margin-top: 10px; color: var(--muted); font-size: 12px; word-break: break-all; }
+  .meta a { color: var(--accent); text-decoration: none; }
+  .row { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+  .conf { color: var(--muted); font-size: 12px; }
+  .empty { color: var(--muted); text-align: center; padding: 40px; }
+  code { color: var(--muted); }
+</style>
+</head>
+<body>
+<header>
+  <h1>Truth<span>Feed</span></h1>
+  <div class="sub">On-chain, TEE-attested claim &amp; news verifier — powered by Ritual precompiles (HTTP 0x0801 + LLM 0x0802). Verdicts are produced inside a TEE and stored on-chain; nobody can silently re-bias them.</div>
+</header>
+<main>
+  <div class="submit">
+    <input id="claimInput" placeholder="Submit a claim to be fact-checked…" />
+    <button id="submitBtn">Submit</button>
+    <button class="btn ghost" id="refreshBtn">Refresh</button>
+  </div>
+  <div id="status" class="conf"></div>
+  <div id="feed"><div class="empty">Loading feed…</div></div>
+</main>
+
+<script type="module">
+import { createPublicClient, createWalletClient, custom, http, defineChain } from 'https://esm.sh/viem@2.21.54';
+
+const cfg = await fetch('/config.json').then(r => r.json());
+const ritual = defineChain({
+  id: cfg.chainId, name: 'Ritual',
+  nativeCurrency: { name: 'RITUAL', symbol: 'RITUAL', decimals: 18 },
+  rpcUrls: { default: { http: [cfg.rpc] } },
+  blockExplorers: { default: { name: 'Explorer', url: 'https://explorer.ritualfoundation.org' } },
+});
+const pub = createPublicClient({ chain: ritual, transport: http() });
+
+const ABI = [
+  { inputs: [], name: 'claimCount', outputs: [{ type: 'uint256' }], stateMutability: 'view', type: 'function' },
+  { inputs: [{ name: 'text', type: 'string' }], name: 'submitClaim', outputs: [{ type: 'uint256' }], stateMutability: 'nonpayable', type: 'function' },
+  { inputs: [{ name: 'id', type: 'uint256' }], name: 'getClaim',
+    outputs: [
+      { name: 'author', type: 'address' }, { name: 'stage', type: 'uint8' },
+      { name: 'httpStatus', type: 'uint16' }, { name: 'llmError', type: 'bool' },
+      { name: 'createdAt', type: 'uint64' }, { name: 'judgedAt', type: 'uint64' },
+      { name: 'text', type: 'string' }, { name: 'sourceUrl', type: 'string' },
+      { name: 'evidence', type: 'string' }, { name: 'verdict', type: 'string' },
+    ], stateMutability: 'view', type: 'function' },
+];
+
+const feed = document.getElementById('feed');
+const statusEl = document.getElementById('status');
+const setStatus = (t) => statusEl.textContent = t;
+
+function parseVerdict(stage, verdict, llmError) {
+  if (stage < 3) return { label: 'PENDING', conf: null, reason: stage === 2 ? 'Evidence fetched, awaiting verdict…' : 'Awaiting evidence…' };
+  if (llmError) return { label: 'UNVERIFIABLE', conf: null, reason: verdict };
+  try {
+    const j = JSON.parse(verdict);
+    return { label: (j.verdict || 'UNVERIFIABLE').toUpperCase(), conf: j.confidence, reason: j.reasoning || '', cites: j.citations || [] };
+  } catch { return { label: 'UNVERIFIABLE', conf: null, reason: verdict }; }
+}
+
+async function load() {
+  try {
+    const count = await pub.readContract({ address: cfg.address, abi: ABI, functionName: 'claimCount' });
+    if (count === 0n) { feed.innerHTML = '<div class="empty">No claims yet. Be the first to submit one.</div>'; return; }
+    const cards = [];
+    for (let i = count; i >= 1n; i--) {
+      const c = await pub.readContract({ address: cfg.address, abi: ABI, functionName: 'getClaim', args: [i] });
+      const [author, stage, , llmError, , , text, sourceUrl, , verdict] = c;
+      const v = parseVerdict(Number(stage), verdict, llmError);
+      const cites = (v.cites || []).map(x => `<code>${escapeHtml(x)}</code>`).join(' · ');
+      cards.push(`<div class="card">
+        <div class="row"><div class="claim">#${i} — ${escapeHtml(text)}</div>
+          <span class="badge b-${v.label}">${v.label}</span></div>
+        ${v.conf != null ? `<div class="conf">confidence: ${v.conf}%</div>` : ''}
+        ${v.reason ? `<div class="reason">${escapeHtml(v.reason)}</div>` : ''}
+        <div class="meta">
+          ${sourceUrl ? `source: <a href="${escapeAttr(sourceUrl)}" target="_blank">${escapeHtml(sourceUrl)}</a><br/>` : ''}
+          ${cites ? `citations: ${cites}<br/>` : ''}
+          by ${author.slice(0,6)}…${author.slice(-4)}
+        </div>
+      </div>`);
+    }
+    feed.innerHTML = cards.join('');
+  } catch (e) { feed.innerHTML = `<div class="empty">Error loading feed: ${escapeHtml(e.message)}</div>`; }
+}
+
+function escapeHtml(s){ return String(s).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
+function escapeAttr(s){ return escapeHtml(s); }
+
+document.getElementById('refreshBtn').onclick = load;
+document.getElementById('submitBtn').onclick = async () => {
+  const text = document.getElementById('claimInput').value.trim();
+  if (!text) return;
+  if (!window.ethereum) { setStatus('No wallet found. Install MetaMask and add Ritual Chain (id ' + cfg.chainId + ').'); return; }
+  try {
+    setStatus('Requesting wallet…');
+    const [account] = await window.ethereum.request({ method: 'eth_requestAccounts' });
+    const wallet = createWalletClient({ account, chain: ritual, transport: custom(window.ethereum) });
+    setStatus('Submitting claim on-chain…');
+    const hash = await wallet.writeContract({ address: cfg.address, abi: ABI, functionName: 'submitClaim', args: [text] });
+    setStatus('Submitted: ' + hash + ' — the operator will fetch evidence & judge it.');
+    document.getElementById('claimInput').value = '';
+    setTimeout(load, 4000);
+  } catch (e) { setStatus('Error: ' + (e.shortMessage || e.message)); }
+};
+
+load();
+setInterval(load, 15000);
+</script>
+</body>
+</html>

@@ -11,132 +11,329 @@
   }
   * { box-sizing: border-box; }
   body { margin: 0; background: var(--bg); color: var(--fg); font: 15px/1.5 system-ui, "Segoe UI", Roboto, sans-serif; }
-  header { padding: 28px 20px; border-bottom: 1px solid var(--line); }
-  h1 { margin: 0; font-size: 22px; }
-  h1 span { color: var(--accent); }
-  .sub { color: var(--muted); margin-top: 6px; font-size: 13px; }
-  main { max-width: 820px; margin: 0 auto; padding: 20px; }
-  .submit { display: flex; gap: 8px; margin-bottom: 22px; }
-  .submit input { flex: 1; background: var(--card); border: 1px solid var(--line); color: var(--fg); padding: 11px 13px; border-radius: 10px; }
-  .submit button, .btn { background: var(--accent); color: #fff; border: 0; padding: 11px 16px; border-radius: 10px; cursor: pointer; font-weight: 600; }
+  header { padding: 22px 20px; border-bottom: 1px solid var(--line); }
+  .top { max-width: 860px; margin: 0 auto; display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; }
+  h1 { margin: 0; font-size: 22px; } h1 span { color: var(--accent); }
+  .sub { color: var(--muted); margin-top: 6px; font-size: 13px; max-width: 560px; }
+  main { max-width: 860px; margin: 0 auto; padding: 20px; }
+  .wallet { text-align: right; font-size: 12px; color: var(--muted); min-width: 210px; }
+  .wallet .addr { color: var(--fg); font-weight: 600; font-size: 13px; }
+  .wallet .bal { margin-top: 2px; }
+  .btn { background: var(--accent); color: #fff; border: 0; padding: 9px 14px; border-radius: 10px; cursor: pointer; font-weight: 600; font-size: 14px; }
+  .btn:disabled { opacity: .5; cursor: not-allowed; }
   .btn.ghost { background: transparent; border: 1px solid var(--line); color: var(--muted); }
+  .btn.sm { padding: 6px 11px; font-size: 13px; }
+  .submit { display: flex; gap: 8px; margin: 6px 0 10px; }
+  .submit input { flex: 1; background: var(--card); border: 1px solid var(--line); color: var(--fg); padding: 11px 13px; border-radius: 10px; }
+  .bar { display: flex; gap: 8px; align-items: center; margin-bottom: 16px; flex-wrap: wrap; }
   .card { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 16px 18px; margin-bottom: 14px; }
-  .claim { font-size: 16px; font-weight: 600; margin-bottom: 10px; }
-  .badge { display: inline-block; padding: 3px 10px; border-radius: 999px; font-size: 12px; font-weight: 700; letter-spacing: .3px; }
+  .claim { font-size: 16px; font-weight: 600; }
+  .badge { display: inline-block; padding: 3px 10px; border-radius: 999px; font-size: 12px; font-weight: 700; letter-spacing: .3px; white-space: nowrap; }
   .b-TRUE { background: rgba(46,204,113,.15); color: var(--true); }
   .b-FALSE { background: rgba(231,76,60,.15); color: var(--false); }
   .b-MISLEADING { background: rgba(243,156,18,.15); color: var(--mis); }
   .b-UNVERIFIABLE, .b-PENDING { background: rgba(127,140,154,.15); color: var(--unv); }
-  .reason { margin-top: 10px; color: var(--fg); }
+  .reason { margin-top: 10px; }
   .meta { margin-top: 10px; color: var(--muted); font-size: 12px; word-break: break-all; }
   .meta a { color: var(--accent); text-decoration: none; }
   .row { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
-  .conf { color: var(--muted); font-size: 12px; }
+  .conf { color: var(--muted); font-size: 12px; margin-top: 4px; }
   .empty { color: var(--muted); text-align: center; padding: 40px; }
+  .actions { margin-top: 12px; display: flex; gap: 8px; }
+  #status { max-width: 860px; margin: 0 auto 6px; padding: 0 20px; color: var(--muted); font-size: 12px; min-height: 16px; word-break: break-all; }
+  .warn { color: var(--mis); }
   code { color: var(--muted); }
+  dialog { background: var(--card); color: var(--fg); border: 1px solid var(--line); border-radius: 14px; padding: 16px; }
+  dialog button { display: block; width: 100%; margin: 6px 0; text-align: left; }
 </style>
 </head>
 <body>
 <header>
-  <h1>Truth<span>Feed</span></h1>
-  <div class="sub">On-chain, TEE-attested claim &amp; news verifier — powered by Ritual precompiles (HTTP 0x0801 + LLM 0x0802). Verdicts are produced inside a TEE and stored on-chain; nobody can silently re-bias them.</div>
+  <div class="top">
+    <div>
+      <h1>Truth<span>Feed</span></h1>
+      <div class="sub">On-chain, TEE-attested claim &amp; news verifier — Ritual precompiles HTTP <code>0x0801</code> + LLM <code>0x0802</code>. Verdicts are produced inside a TEE and stored on-chain.</div>
+    </div>
+    <div class="wallet" id="wallet">
+      <button class="btn" id="connectBtn">Connect wallet</button>
+    </div>
+  </div>
 </header>
+<div id="status"></div>
 <main>
   <div class="submit">
     <input id="claimInput" placeholder="Submit a claim to be fact-checked…" />
-    <button id="submitBtn">Submit</button>
-    <button class="btn ghost" id="refreshBtn">Refresh</button>
+    <button class="btn" id="submitBtn">Submit</button>
   </div>
-  <div id="status" class="conf"></div>
+  <div class="bar">
+    <button class="btn ghost sm" id="refreshBtn">Refresh</button>
+    <button class="btn ghost sm" id="depositBtn" title="Fund RitualWallet so your account can pay async precompile fees">Deposit 0.4 RITUAL (fees)</button>
+    <span class="conf" id="hint">Connect a wallet on Ritual Chain (id 1979) to submit &amp; run checks.</span>
+  </div>
   <div id="feed"><div class="empty">Loading feed…</div></div>
 </main>
 
+<dialog id="pickerDlg"><div style="margin-bottom:8px;font-weight:600">Choose a wallet</div><div id="pickerList"></div></dialog>
+
 <script type="module">
-import { createPublicClient, createWalletClient, custom, http, defineChain } from 'https://esm.sh/viem@2.21.54';
+import {
+  createPublicClient, createWalletClient, custom, http, defineChain,
+  parseEther, formatEther,
+} from 'https://esm.sh/viem@2.21.54';
 
 const cfg = await fetch('/config.json').then(r => r.json());
-const ritual = defineChain({
+const RITUAL = defineChain({
   id: cfg.chainId, name: 'Ritual',
   nativeCurrency: { name: 'RITUAL', symbol: 'RITUAL', decimals: 18 },
   rpcUrls: { default: { http: [cfg.rpc] } },
   blockExplorers: { default: { name: 'Explorer', url: 'https://explorer.ritualfoundation.org' } },
 });
-const pub = createPublicClient({ chain: ritual, transport: http() });
+const pub = createPublicClient({ chain: RITUAL, transport: http() });
 
+// ---- addresses ----
+const RITUAL_WALLET = '0x532F0dF0896F353d8C3DD8cc134e8129DA2a3948';
+const TEE_REGISTRY  = '0x9644e8562cE0Fe12b4deeC4163c064A8862Bf47F';
+const CAP = { HTTP: 0, LLM: 1 };
+const FEES = { maxFeePerGas: 20000000000n, maxPriorityFeePerGas: 2000000000n };
+
+// ---- ABIs ----
 const ABI = [
   { inputs: [], name: 'claimCount', outputs: [{ type: 'uint256' }], stateMutability: 'view', type: 'function' },
   { inputs: [{ name: 'text', type: 'string' }], name: 'submitClaim', outputs: [{ type: 'uint256' }], stateMutability: 'nonpayable', type: 'function' },
+  { inputs: [
+      { name: 'id', type: 'uint256' }, { name: 'executor', type: 'address' }, { name: 'url', type: 'string' },
+      { name: 'headerKeys', type: 'string[]' }, { name: 'headerValues', type: 'string[]' }, { name: 'ttl', type: 'uint256' },
+    ], name: 'fetchEvidence', outputs: [], stateMutability: 'nonpayable', type: 'function' },
+  { inputs: [
+      { name: 'id', type: 'uint256' }, { name: 'executor', type: 'address' }, { name: 'messagesJson', type: 'string' },
+      { name: 'ttl', type: 'uint256' }, { name: 'maxCompletionTokens', type: 'int256' },
+    ], name: 'judgeClaim', outputs: [], stateMutability: 'nonpayable', type: 'function' },
   { inputs: [{ name: 'id', type: 'uint256' }], name: 'getClaim',
     outputs: [
-      { name: 'author', type: 'address' }, { name: 'stage', type: 'uint8' },
-      { name: 'httpStatus', type: 'uint16' }, { name: 'llmError', type: 'bool' },
-      { name: 'createdAt', type: 'uint64' }, { name: 'judgedAt', type: 'uint64' },
-      { name: 'text', type: 'string' }, { name: 'sourceUrl', type: 'string' },
-      { name: 'evidence', type: 'string' }, { name: 'verdict', type: 'string' },
+      { name: 'author', type: 'address' }, { name: 'stage', type: 'uint8' }, { name: 'httpStatus', type: 'uint16' },
+      { name: 'llmError', type: 'bool' }, { name: 'createdAt', type: 'uint64' }, { name: 'judgedAt', type: 'uint64' },
+      { name: 'text', type: 'string' }, { name: 'sourceUrl', type: 'string' }, { name: 'evidence', type: 'string' }, { name: 'verdict', type: 'string' },
     ], stateMutability: 'view', type: 'function' },
 ];
+const WALLET_ABI = [
+  { inputs: [{ name: 'lockDuration', type: 'uint256' }], name: 'deposit', outputs: [], stateMutability: 'payable', type: 'function' },
+  { inputs: [{ name: 'a', type: 'address' }], name: 'balanceOf', outputs: [{ type: 'uint256' }], stateMutability: 'view', type: 'function' },
+  { inputs: [{ name: 'a', type: 'address' }], name: 'lockUntil', outputs: [{ type: 'uint256' }], stateMutability: 'view', type: 'function' },
+];
+const REGISTRY_ABI = [{
+  inputs: [{ name: 'capability', type: 'uint8' }, { name: 'checkValidity', type: 'bool' }],
+  name: 'getServicesByCapability',
+  outputs: [{ type: 'tuple[]', components: [
+    { name: 'node', type: 'tuple', components: [
+      { name: 'paymentAddress', type: 'address' }, { name: 'teeAddress', type: 'address' }, { name: 'teeType', type: 'uint8' },
+      { name: 'publicKey', type: 'bytes' }, { name: 'endpoint', type: 'string' }, { name: 'certPubKeyHash', type: 'bytes32' }, { name: 'capability', type: 'uint8' },
+    ]}, { name: 'isValid', type: 'bool' }, { name: 'workloadId', type: 'bytes32' },
+  ]}],
+  stateMutability: 'view', type: 'function',
+}];
 
-const feed = document.getElementById('feed');
-const statusEl = document.getElementById('status');
-const setStatus = (t) => statusEl.textContent = t;
+// ---- wallet adapter (EIP-6963 + fallback) ----
+const providers = new Map(); // rdns -> { info, provider }
+window.addEventListener('eip6963:announceProvider', (e) => {
+  providers.set(e.detail.info.rdns, e.detail);
+});
+window.dispatchEvent(new Event('eip6963:requestProvider'));
 
-function parseVerdict(stage, verdict, llmError) {
-  if (stage < 3) return { label: 'PENDING', conf: null, reason: stage === 2 ? 'Evidence fetched, awaiting verdict…' : 'Awaiting evidence…' };
-  if (llmError) return { label: 'UNVERIFIABLE', conf: null, reason: verdict };
-  try {
-    const j = JSON.parse(verdict);
-    return { label: (j.verdict || 'UNVERIFIABLE').toUpperCase(), conf: j.confidence, reason: j.reasoning || '', cites: j.citations || [] };
-  } catch { return { label: 'UNVERIFIABLE', conf: null, reason: verdict }; }
+let state = { provider: null, account: null, wallet: null, chainId: null };
+const $ = (id) => document.getElementById(id);
+const setStatus = (t, warn) => { const s = $('status'); s.textContent = t || ''; s.className = warn ? 'warn' : ''; };
+
+async function chooseProvider() {
+  const list = [...providers.values()];
+  if (list.length === 0) {
+    if (window.ethereum) return window.ethereum;
+    throw new Error('No EVM wallet found. Install MetaMask / Rabby.');
+  }
+  if (list.length === 1) return list[0].provider;
+  return await new Promise((resolve) => {
+    const dlg = $('pickerDlg'); const box = $('pickerList'); box.innerHTML = '';
+    for (const d of list) {
+      const b = document.createElement('button'); b.className = 'btn ghost';
+      b.textContent = d.info.name;
+      b.onclick = () => { dlg.close(); resolve(d.provider); };
+      box.appendChild(b);
+    }
+    dlg.showModal();
+  });
 }
+
+async function ensureChain(provider) {
+  const idHex = await provider.request({ method: 'eth_chainId' });
+  if (parseInt(idHex, 16) === cfg.chainId) return;
+  try {
+    await provider.request({ method: 'wallet_switchEthereumChain', params: [{ chainId: '0x' + cfg.chainId.toString(16) }] });
+  } catch (e) {
+    if (e.code === 4902 || /Unrecognized chain/i.test(e.message || '')) {
+      await provider.request({ method: 'wallet_addEthereumChain', params: [{
+        chainId: '0x' + cfg.chainId.toString(16),
+        chainName: 'Ritual', nativeCurrency: { name: 'RITUAL', symbol: 'RITUAL', decimals: 18 },
+        rpcUrls: [cfg.rpc], blockExplorerUrls: ['https://explorer.ritualfoundation.org'],
+      }]});
+    } else throw e;
+  }
+}
+
+async function connect() {
+  try {
+    setStatus('Connecting…');
+    const provider = await chooseProvider();
+    const accounts = await provider.request({ method: 'eth_requestAccounts' });
+    await ensureChain(provider);
+    state.provider = provider;
+    state.account = accounts[0];
+    state.wallet = createWalletClient({ account: accounts[0], chain: RITUAL, transport: custom(provider) });
+    state.chainId = cfg.chainId;
+    provider.removeListener?.('accountsChanged', onAccounts);
+    provider.on?.('accountsChanged', onAccounts);
+    provider.on?.('chainChanged', () => location.reload());
+    setStatus('Connected.');
+    await renderWallet();
+    load();
+  } catch (e) { setStatus(e.shortMessage || e.message, true); }
+}
+function onAccounts(accs) { if (!accs || !accs.length) { state = { provider: null, account: null, wallet: null, chainId: null }; renderWallet(); } else { state.account = accs[0]; state.wallet = createWalletClient({ account: accs[0], chain: RITUAL, transport: custom(state.provider) }); renderWallet(); } }
+
+async function renderWallet() {
+  const el = $('wallet');
+  if (!state.account) { el.innerHTML = '<button class="btn" id="connectBtn">Connect wallet</button>'; $('connectBtn').onclick = connect; updateHint(); load(); return; }
+  const [nat, rw] = await Promise.all([
+    pub.getBalance({ address: state.account }),
+    pub.readContract({ address: RITUAL_WALLET, abi: WALLET_ABI, functionName: 'balanceOf', args: [state.account] }).catch(() => 0n),
+  ]);
+  el.innerHTML = `<div class="addr">${state.account.slice(0,6)}…${state.account.slice(-4)}</div>
+    <div class="bal">${(+formatEther(nat)).toFixed(4)} RITUAL</div>
+    <div class="bal">fees escrow: ${(+formatEther(rw)).toFixed(3)}</div>
+    <button class="btn ghost sm" id="disconnectBtn" style="margin-top:6px">Disconnect</button>`;
+  $('disconnectBtn').onclick = () => { state = { provider: null, account: null, wallet: null, chainId: null }; renderWallet(); };
+  updateHint();
+}
+function updateHint() {
+  $('hint').textContent = state.account
+    ? 'Connected — submit a claim, then hit “Run AI check” on it.'
+    : 'Connect a wallet on Ritual Chain (id 1979) to submit & run checks.';
+}
+
+// ---- chain helpers ----
+async function pickExecutor(capability) {
+  const svc = await pub.readContract({ address: TEE_REGISTRY, abi: REGISTRY_ABI, functionName: 'getServicesByCapability', args: [capability, true] });
+  const valid = svc.filter((s) => s.isValid);
+  if (!valid.length) throw new Error(`No live executor for capability ${capability}`);
+  return valid[0].node.teeAddress;
+}
+async function waitTx(hash, timeout = 300000) {
+  return pub.waitForTransactionReceipt({ hash, timeout, pollingInterval: 3000 });
+}
+async function ensureDeposit(minRIT = 0.4) {
+  const [bal, lock, cur] = await Promise.all([
+    pub.readContract({ address: RITUAL_WALLET, abi: WALLET_ABI, functionName: 'balanceOf', args: [state.account] }),
+    pub.readContract({ address: RITUAL_WALLET, abi: WALLET_ABI, functionName: 'lockUntil', args: [state.account] }),
+    pub.getBlockNumber(),
+  ]);
+  if (bal >= parseEther(String(minRIT)) && lock >= cur + 5000n) return;
+  const value = bal >= parseEther(String(minRIT)) ? parseEther('0.01') : parseEther(String(minRIT));
+  setStatus('Depositing fees to RitualWallet (extend lock)…');
+  const hash = await state.wallet.writeContract({ address: RITUAL_WALLET, abi: WALLET_ABI, functionName: 'deposit', args: [200000n], value, ...FEES });
+  await waitTx(hash, 120000);
+}
+
+// ---- actions ----
+async function submit() {
+  if (!state.account) return connect();
+  const text = $('claimInput').value.trim(); if (!text) return;
+  try {
+    setStatus('Submitting claim on-chain…');
+    const hash = await state.wallet.writeContract({ address: cfg.address, abi: ABI, functionName: 'submitClaim', args: [text], gas: 500000n, ...FEES });
+    await waitTx(hash, 120000);
+    $('claimInput').value = '';
+    setStatus('Claim submitted: ' + hash);
+    load();
+  } catch (e) { setStatus(e.shortMessage || e.message, true); }
+}
+
+async function runCheck(id) {
+  if (!state.account) return connect();
+  try {
+    await ensureDeposit(0.4);
+    const c = await pub.readContract({ address: cfg.address, abi: ABI, functionName: 'getClaim', args: [BigInt(id)] });
+    const text = c[6];
+
+    if (Number(c[1]) < 2) {
+      setStatus(`#${id}: fetching evidence via HTTP precompile (TEE)…`);
+      const httpEx = await pickExecutor(CAP.HTTP);
+      const url = `https://en.wikipedia.org/w/rest.php/v1/search/page?q=${encodeURIComponent(text)}&limit=1`;
+      const hk = ['User-Agent', 'Accept'];
+      const hv = ['TruthFeed/0.1 (https://ritualfoundation.org)', 'application/json'];
+      const h1 = await state.wallet.writeContract({ address: cfg.address, abi: ABI, functionName: 'fetchEvidence', args: [BigInt(id), httpEx, url, hk, hv, 200n], gas: 3000000n, ...FEES });
+      await waitTx(h1);
+      load();
+    }
+
+    setStatus(`#${id}: judging via LLM precompile (GLM-4.7 in TEE, ~5-60s)…`);
+    const c2 = await pub.readContract({ address: cfg.address, abi: ABI, functionName: 'getClaim', args: [BigInt(id)] });
+    const llmEx = await pickExecutor(CAP.LLM);
+    const messages = [
+      { role: 'system', content: 'You are TruthFeed, a rigorous fact-checker. Judge the CLAIM using ONLY the provided EVIDENCE. Reply with exactly one JSON object and nothing else: {"verdict":"TRUE|MISLEADING|FALSE|UNVERIFIABLE","confidence":0-100,"reasoning":"one or two sentences","citations":["short source refs"]}. If the evidence does not settle the claim, use "UNVERIFIABLE".' },
+      { role: 'user', content: `CLAIM:\n${c2[6]}\n\nEVIDENCE (raw source JSON from ${c2[7]}):\n${c2[8]}` },
+    ];
+    const h2 = await state.wallet.writeContract({ address: cfg.address, abi: ABI, functionName: 'judgeClaim', args: [BigInt(id), llmEx, JSON.stringify(messages), 300n, 4096n], gas: 6000000n, ...FEES });
+    await waitTx(h2);
+    setStatus(`#${id}: verdict stored on-chain.`);
+    load();
+    renderWallet();
+  } catch (e) { setStatus(`#${id}: ` + (e.shortMessage || e.message), true); }
+}
+
+// ---- feed ----
+function parseVerdict(stage, verdict, llmError) {
+  if (stage < 3) return { label: 'PENDING', reason: stage === 2 ? 'Evidence fetched — awaiting verdict.' : 'Awaiting evidence & verdict.' };
+  if (llmError) return { label: 'UNVERIFIABLE', reason: verdict };
+  try { const j = JSON.parse(verdict); return { label: (j.verdict || 'UNVERIFIABLE').toUpperCase(), conf: j.confidence, reason: j.reasoning || '', cites: j.citations || [] }; }
+  catch { return { label: 'UNVERIFIABLE', reason: verdict }; }
+}
+const esc = (s) => String(s).replace(/[&<>"']/g, m => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[m]));
 
 async function load() {
   try {
     const count = await pub.readContract({ address: cfg.address, abi: ABI, functionName: 'claimCount' });
-    if (count === 0n) { feed.innerHTML = '<div class="empty">No claims yet. Be the first to submit one.</div>'; return; }
+    if (count === 0n) { $('feed').innerHTML = '<div class="empty">No claims yet. Be the first to submit one.</div>'; return; }
     const cards = [];
     for (let i = count; i >= 1n; i--) {
       const c = await pub.readContract({ address: cfg.address, abi: ABI, functionName: 'getClaim', args: [i] });
       const [author, stage, , llmError, , , text, sourceUrl, , verdict] = c;
       const v = parseVerdict(Number(stage), verdict, llmError);
-      const cites = (v.cites || []).map(x => `<code>${escapeHtml(x)}</code>`).join(' · ');
+      const cites = (v.cites || []).map(x => `<code>${esc(x)}</code>`).join(' · ');
+      const canRun = state.account && Number(stage) < 3;
       cards.push(`<div class="card">
-        <div class="row"><div class="claim">#${i} — ${escapeHtml(text)}</div>
-          <span class="badge b-${v.label}">${v.label}</span></div>
+        <div class="row"><div class="claim">#${i} — ${esc(text)}</div><span class="badge b-${v.label}">${v.label}</span></div>
         ${v.conf != null ? `<div class="conf">confidence: ${v.conf}%</div>` : ''}
-        ${v.reason ? `<div class="reason">${escapeHtml(v.reason)}</div>` : ''}
+        ${v.reason ? `<div class="reason">${esc(v.reason)}</div>` : ''}
         <div class="meta">
-          ${sourceUrl ? `source: <a href="${escapeAttr(sourceUrl)}" target="_blank">${escapeHtml(sourceUrl)}</a><br/>` : ''}
+          ${sourceUrl ? `source: <a href="${esc(sourceUrl)}" target="_blank">${esc(sourceUrl)}</a><br/>` : ''}
           ${cites ? `citations: ${cites}<br/>` : ''}
           by ${author.slice(0,6)}…${author.slice(-4)}
         </div>
+        ${canRun ? `<div class="actions"><button class="btn sm run" data-id="${i}">Run AI check</button></div>` : ''}
       </div>`);
     }
-    feed.innerHTML = cards.join('');
-  } catch (e) { feed.innerHTML = `<div class="empty">Error loading feed: ${escapeHtml(e.message)}</div>`; }
+    $('feed').innerHTML = cards.join('');
+    document.querySelectorAll('.run').forEach(b => b.onclick = () => runCheck(b.dataset.id));
+  } catch (e) { $('feed').innerHTML = `<div class="empty">Error: ${esc(e.message)}</div>`; }
 }
 
-function escapeHtml(s){ return String(s).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
-function escapeAttr(s){ return escapeHtml(s); }
-
-document.getElementById('refreshBtn').onclick = load;
-document.getElementById('submitBtn').onclick = async () => {
-  const text = document.getElementById('claimInput').value.trim();
-  if (!text) return;
-  if (!window.ethereum) { setStatus('No wallet found. Install MetaMask and add Ritual Chain (id ' + cfg.chainId + ').'); return; }
-  try {
-    setStatus('Requesting wallet…');
-    const [account] = await window.ethereum.request({ method: 'eth_requestAccounts' });
-    const wallet = createWalletClient({ account, chain: ritual, transport: custom(window.ethereum) });
-    setStatus('Submitting claim on-chain…');
-    const hash = await wallet.writeContract({ address: cfg.address, abi: ABI, functionName: 'submitClaim', args: [text] });
-    setStatus('Submitted: ' + hash + ' — the operator will fetch evidence & judge it.');
-    document.getElementById('claimInput').value = '';
-    setTimeout(load, 4000);
-  } catch (e) { setStatus('Error: ' + (e.shortMessage || e.message)); }
-};
+// ---- wire up ----
+$('connectBtn').onclick = connect;
+$('submitBtn').onclick = submit;
+$('refreshBtn').onclick = load;
+$('depositBtn').onclick = async () => { if (!state.account) return connect(); try { await ensureDeposit(0.4); setStatus('Fees ready.'); renderWallet(); } catch (e) { setStatus(e.shortMessage || e.message, true); } };
+$('claimInput').addEventListener('keydown', (e) => { if (e.key === 'Enter') submit(); });
 
 load();
-setInterval(load, 15000);
+setInterval(load, 20000);
 </script>
 </body>
 </html>

@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>TruthFeed — The Machine Tribunal</title>
+<title>TruthFeed · The Machine Tribunal</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous">
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
@@ -55,7 +55,7 @@
     <div style="display: flex; align-items: center; gap: 18px;">
       <div style="font-size: 11px; color: rgba(237,232,220,0.45); letter-spacing: 0.1em; display: flex; gap: 8px; align-items: center;">
         <span style="display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: #6FE3A0; animation: tf-pulse 1.8s ease-in-out infinite;"></span>
-        <span id="blockReadout">BLOCK #—</span>
+        <span id="blockReadout">BLOCK #·</span>
       </div>
       <button id="connectBtn" data-magnetic class="btn-hover" style="font-size: 12px; font-weight: 600; letter-spacing: 0.14em; color: #0B0A08; background: #EDE8DC; border: none; padding: 11px 20px; cursor: pointer; transition: background 0.2s;">CONNECT WALLET</button>
     </div>
@@ -74,7 +74,7 @@
         <span style="display: block;"><span data-scramble>stands </span><em data-scramble style="color: #FF4D1C; font-style: italic;">trial.</em></span>
       </h1>
       <div style="display: flex; gap: clamp(24px, 5vw, 80px); align-items: flex-end; justify-content: space-between; margin-top: clamp(28px, 5vh, 52px); flex-wrap: wrap;">
-        <p style="max-width: 520px; font-size: clamp(13px, 1.2vw, 15px); line-height: 1.75; color: rgba(237,232,220,0.68); margin: 0;">Submit a rumor, a headline, a "fact." The machine hunts real evidence with the HTTP precompile, deliberates inside a sealed TEE via on-chain LLM inference, and carves its verdict onto Ritual Chain — permanently. Nobody can bribe it. Nobody can bury it.</p>
+        <p style="max-width: 520px; font-size: clamp(13px, 1.2vw, 15px); line-height: 1.75; color: rgba(237,232,220,0.68); margin: 0;">Submit a rumor, a headline, a "fact." The machine hunts real evidence with the HTTP precompile, deliberates inside a sealed TEE via on-chain LLM inference, and carves its verdict onto Ritual Chain · permanently. Nobody can bribe it. Nobody can bury it.</p>
         <div style="display: flex; gap: clamp(24px, 4vw, 64px); flex-wrap: wrap;">
           <div>
             <div id="statJudged" data-count style="font-family: 'Instrument Serif', serif; font-size: clamp(36px, 4vw, 60px); line-height: 1;">0</div>
@@ -104,7 +104,7 @@
   <!-- SUBMIT -->
   <section style="position: relative; z-index: 1; padding: clamp(64px, 12vh, 130px) clamp(16px, 4vw, 56px);">
     <div data-reveal style="max-width: 1000px; margin: 0 auto;">
-      <div style="font-size: 11px; letter-spacing: 0.24em; color: #FF4D1C; margin-bottom: 18px;">01 — FILE A CLAIM</div>
+      <div style="font-size: 11px; letter-spacing: 0.24em; color: #FF4D1C; margin-bottom: 18px;">01 · FILE A CLAIM</div>
       <div style="font-family: 'Instrument Serif', serif; font-size: clamp(30px, 4vw, 52px); line-height: 1.1; margin-bottom: 36px;">State your claim. <em style="color: rgba(237,232,220,0.5);">The machine will decide.</em></div>
       <div style="display: flex; gap: 0; align-items: stretch; border: 1px solid rgba(237,232,220,0.22); background: rgba(18,16,12,0.7);">
         <input id="claimInput" placeholder="e.g. “Octopuses have three hearts and blue blood.”" style="flex: 1; min-width: 0; background: transparent; border: none; color: #EDE8DC; font-family: 'IBM Plex Mono', monospace; font-size: clamp(13px, 1.3vw, 16px); padding: 22px clamp(14px, 2vw, 26px); letter-spacing: 0.02em;">
@@ -122,7 +122,7 @@
     <div style="max-width: 1400px; margin: 0 auto;">
       <div data-reveal style="display: flex; justify-content: space-between; align-items: baseline; border-bottom: 2px solid #EDE8DC; padding-bottom: 16px; flex-wrap: wrap; gap: 12px;">
         <div style="display: flex; align-items: baseline; gap: 20px;">
-          <div style="font-size: 11px; letter-spacing: 0.24em; color: #FF4D1C;">02 — THE DOCKET</div>
+          <div style="font-size: 11px; letter-spacing: 0.24em; color: #FF4D1C;">02 · THE DOCKET</div>
           <div style="font-family: 'Instrument Serif', serif; font-size: clamp(26px, 3vw, 40px); line-height: 1;">Live verdict ledger</div>
         </div>
         <div style="display: flex; gap: 14px; font-size: 10px; letter-spacing: 0.14em; flex-wrap: wrap;">
@@ -145,9 +145,9 @@
 
   <!-- FOOTER -->
   <footer style="position: relative; z-index: 1; border-top: 1px solid rgba(237,232,220,0.14); padding: 24px clamp(16px, 4vw, 56px); display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; font-size: 10px; letter-spacing: 0.18em; color: rgba(237,232,220,0.4);">
-    <span>TRUTHFEED © 2026 — THE MACHINE TRIBUNAL</span>
-    <span id="contractTag">CONTRACT: —</span>
-    <span id="blockReadout2">BLOCK #—</span>
+    <span>TRUTHFEED © 2026 · THE MACHINE TRIBUNAL</span>
+    <span id="contractTag">CONTRACT: ·</span>
+    <span id="blockReadout2">BLOCK #·</span>
   </footer>
 
   <!-- PIPELINE OVERLAY -->
@@ -291,7 +291,7 @@ async function connect() {
     state.wallet = createWalletClient({ account: accounts[0], chain: RITUAL, transport: custom(provider) });
     provider.on?.('accountsChanged', (a) => { if (!a.length) { state.account = null; state.wallet = null; } else { state.account = a[0]; state.wallet = createWalletClient({ account: a[0], chain: RITUAL, transport: custom(provider) }); } renderWallet(); render(); });
     provider.on?.('chainChanged', () => location.reload());
-    hint('CONNECTED — SUBMIT A CLAIM');
+    hint('CONNECTED · SUBMIT A CLAIM');
     renderWallet(); render();
   } catch (e) { hint((e.shortMessage || e.message || 'CONNECT FAILED').toUpperCase()); }
 }
@@ -351,7 +351,7 @@ async function submit() {
     const hash = await state.wallet.writeContract({ address: cfg.address, abi: ABI, functionName: 'submitClaim', args: [text], gas: 500000n, ...FEES });
     await waitTx(hash, 120000);
     $('claimInput').value = '';
-    hint('✓ FILED — RUN VERIFICATION ON IT BELOW');
+    hint('✓ FILED · RUN VERIFICATION ON IT BELOW');
     await load();
   } catch (e) { hint((e.shortMessage || e.message).toUpperCase()); }
 }
@@ -399,7 +399,7 @@ function revealVerdict(v) {
   $('pipeConfBar').style.background = theme.color;
   $('pipeReasoning').textContent = v.reasoning ? 'REASONING // ' + v.reasoning : '';
   const seal = $('pipeSeal'); seal.style.color = theme.color;
-  seal.textContent = '⛓ SEALED PERMANENTLY — BLOCK #' + state.block.toString();
+  seal.textContent = '⛓ SEALED PERMANENTLY · BLOCK #' + state.block.toString();
   seal.style.animation = 'tf-carve 1.2s ease-out both';
   $('pipeVerdict').style.display = 'flex';
   requestAnimationFrame(() => { $('pipeConfBar').style.width = v.confidence + '%'; });
@@ -412,39 +412,39 @@ async function runVerification(id) {
   openPipeline(c.text);
   try {
     setStage(0);
-    log('> claim #' + id + ' received — preparing trial', dim);
+    log('> claim #' + id + ' received · preparing trial', dim);
     if (await ensureDeposit(0.4)) log('> fees locked in RitualWallet escrow', dim);
-    else log('> fee escrow OK — proceeding', dim);
+    else log('> fee escrow OK · proceeding', dim);
 
     if (c.stage < 2) {
       setStage(1);
       const httpEx = await pickExecutor(CAP.HTTP);
-      log('> evidence crawler — HTTP precompile 0x0801', dim);
+      log('> evidence crawler · HTTP precompile 0x0801', dim);
       log('> executor ' + short(httpEx) + ' · TEE sealed', dim);
       const h1 = await state.wallet.writeContract({ address: cfg.address, abi: ABI, functionName: 'fetchEvidence', args: [BigInt(id), httpEx, wikiUrl(c.text), ['User-Agent', 'Accept'], ['TruthFeed/0.1 (https://ritualfoundation.org)', 'application/json'], 200n], gas: 3000000n, ...FEES });
-      log('> tx ' + short(h1) + ' — awaiting async settlement', dim);
+      log('> tx ' + short(h1) + ' · awaiting async settlement', dim);
       await waitTx(h1); c = await getClaim(id);
       log('> evidence retrieved · HTTP ' + c.httpStatus, green);
       await load();
     } else { setStage(1); log('> evidence already on record', dim); }
 
     setStage(2);
-    log('> entering sealed enclave — LLM 0x0802 (GLM-4.7)', orange);
+    log('> entering sealed enclave · LLM 0x0802 (GLM-4.7)', orange);
     const llmEx = await pickExecutor(CAP.LLM);
     log('> executor ' + short(llmEx) + ' · attestation OK', orange);
     const msgs = buildMessages(c);
     let judged = false;
     for (let a = 0; a < 4 && !judged; a++) {
       const h2 = await state.wallet.writeContract({ address: cfg.address, abi: ABI, functionName: 'judgeClaim', args: [BigInt(id), llmEx, msgs, 480n, 4096n], gas: 6000000n, ...FEES });
-      log('> tx ' + short(h2) + ' — deliberating (attempt ' + (a + 1) + ')', orange);
+      log('> tx ' + short(h2) + ' · deliberating (attempt ' + (a + 1) + ')', orange);
       try { await waitTx(h2, 220000); const cc = await getClaim(id); if (cc.stage >= 3) { judged = true; c = cc; } }
-      catch { log('> enclave busy — retrying', dim); }
+      catch { log('> enclave busy · retrying', dim); }
     }
-    if (!judged) { log('> enclave unavailable — abort & retry later', red); return; }
+    if (!judged) { log('> enclave unavailable · abort & retry later', red); return; }
 
     state.block = await pub.getBlockNumber();
     setStage(3);
-    log('> verdict carved on-chain — immutable', green);
+    log('> verdict carved on-chain · immutable', green);
     revealVerdict(c);
     await load(); renderWallet();
   } catch (e) { log('> ERROR: ' + (e.shortMessage || e.message), red); }
@@ -473,7 +473,7 @@ function cardHtml(c) {
     body = `<div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;">
         <div style="font-size:11px;letter-spacing:0.16em;color:rgba(237,232,220,0.5);display:flex;align-items:center;gap:10px;">
           <span style="display:inline-block;width:8px;height:8px;border:1px solid rgba(237,232,220,0.5);animation:tf-spin 3s linear infinite;"></span>
-          ${c.stage === 2 ? 'EVIDENCE GATHERED — AWAITING VERDICT' : 'AWAITING TRIAL — EVIDENCE NOT YET GATHERED'}</div>
+          ${c.stage === 2 ? 'EVIDENCE GATHERED · AWAITING VERDICT' : 'AWAITING TRIAL · EVIDENCE NOT YET GATHERED'}</div>
         ${runBtn}</div>`;
     right = `<div style="border:1px dashed rgba(237,232,220,0.35);color:rgba(237,232,220,0.45);font-size:clamp(14px,1.3vw,18px);letter-spacing:0.2em;padding:12px 22px;transform:rotate(-8deg);animation:tf-pulse 2.2s ease-in-out infinite;">PENDING</div>`;
   }
@@ -494,7 +494,7 @@ function cardHtml(c) {
 function render() {
   const claims = [...state.claims].sort((a, b) => b.id - a.id);
   $('feed').innerHTML = claims.length ? claims.map(cardHtml).join('')
-    : '<div style="padding:60px 0;color:rgba(237,232,220,0.4);font-size:12px;letter-spacing:0.14em;">NO CLAIMS ON THE DOCKET YET — FILE THE FIRST.</div>';
+    : '<div style="padding:60px 0;color:rgba(237,232,220,0.4);font-size:12px;letter-spacing:0.14em;">NO CLAIMS ON THE DOCKET YET · FILE THE FIRST.</div>';
   // stats
   const verified = state.claims.filter(c => c.stage >= 3);
   const avg = verified.length ? Math.round(verified.reduce((a, c) => a + c.confidence, 0) / verified.length) : 0;
@@ -504,8 +504,8 @@ function render() {
   animateCount($('statCitations'), cites);
   // ticker
   const t = state.claims.length
-    ? state.claims.map(c => (c.label || 'PENDING') + ' · “' + c.text + '” · ' + (c.stage >= 3 ? c.confidence + '% CONF' : 'IN MEMPOOL') + '  ——  ').join('')
-    : 'AWAITING CLAIMS · THE MACHINE IS IDLE · FILE A CLAIM TO BEGIN THE TRIAL  ——  ';
+    ? state.claims.map(c => (c.label || 'PENDING') + ' · “' + c.text + '” · ' + (c.stage >= 3 ? c.confidence + '% CONF' : 'IN MEMPOOL') + '  //  ').join('')
+    : 'AWAITING CLAIMS · THE MACHINE IS IDLE · FILE A CLAIM TO BEGIN THE TRIAL  //  ';
   $('ticker1').textContent = t; $('ticker2').textContent = t;
   // motion for new content
   wireMagnetic();

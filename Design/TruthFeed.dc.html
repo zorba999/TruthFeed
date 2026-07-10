@@ -8,7 +8,7 @@
 <body>
 <x-dc>
 <helmet>
-  <title>TruthFeed — The Machine Tribunal</title>
+  <title>TruthFeed · The Machine Tribunal</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous">
   <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
@@ -79,7 +79,7 @@
       </h1>
 
       <div style="display: flex; gap: clamp(24px, 5vw, 80px); align-items: flex-end; justify-content: space-between; margin-top: clamp(28px, 5vh, 52px); flex-wrap: wrap;">
-        <p style="max-width: 520px; font-size: clamp(13px, 1.2vw, 15px); line-height: 1.75; color: rgba(237,232,220,0.68); margin: 0;">Submit a rumor, a headline, a "fact." The machine hunts real evidence, deliberates inside a sealed AI enclave, and carves its verdict onto the chain — permanently. Nobody can bribe it. Nobody can bury it.</p>
+        <p style="max-width: 520px; font-size: clamp(13px, 1.2vw, 15px); line-height: 1.75; color: rgba(237,232,220,0.68); margin: 0;">Submit a rumor, a headline, a "fact." The machine hunts real evidence, deliberates inside a sealed AI enclave, and carves its verdict onto the chain · permanently. Nobody can bribe it. Nobody can bury it.</p>
         <div style="display: flex; gap: clamp(24px, 4vw, 64px); flex-wrap: wrap;">
           <div>
             <div data-count="1" style="font-family: 'Instrument Serif', serif; font-size: clamp(36px, 4vw, 60px); line-height: 1;">{{ statJudged }}</div>
@@ -109,7 +109,7 @@
   <!-- ================= SUBMIT ================= -->
   <section data-screen-label="Submit a claim" style="position: relative; z-index: 1; padding: clamp(64px, 12vh, 130px) clamp(16px, 4vw, 56px);">
     <div data-reveal="1" style="max-width: 1000px; margin: 0 auto;">
-      <div style="font-size: 11px; letter-spacing: 0.24em; color: #FF4D1C; margin-bottom: 18px;">01 — FILE A CLAIM</div>
+      <div style="font-size: 11px; letter-spacing: 0.24em; color: #FF4D1C; margin-bottom: 18px;">01 · FILE A CLAIM</div>
       <div style="font-family: 'Instrument Serif', serif; font-size: clamp(30px, 4vw, 52px); line-height: 1.1; margin-bottom: 36px;">State your claim. <em style="color: rgba(237,232,220,0.5);">The machine will decide.</em></div>
       <div style="display: flex; gap: 0; align-items: stretch; border: 1px solid rgba(237,232,220,0.22); background: rgba(18,16,12,0.7);">
         <input value="{{ inputValue }}" onChange="{{ onInput }}" onKeyDown="{{ onInputKey }}" placeholder="e.g. “Octopuses have three hearts and blue blood.”" style="flex: 1; min-width: 0; background: transparent; border: none; color: #EDE8DC; font-family: 'IBM Plex Mono', monospace; font-size: clamp(13px, 1.3vw, 16px); padding: 22px clamp(14px, 2vw, 26px); letter-spacing: 0.02em;">
@@ -127,7 +127,7 @@
     <div style="max-width: 1400px; margin: 0 auto;">
       <div data-reveal="1" style="display: flex; justify-content: space-between; align-items: baseline; border-bottom: 2px solid #EDE8DC; padding-bottom: 16px; margin-bottom: 0; flex-wrap: wrap; gap: 12px;">
         <div style="display: flex; align-items: baseline; gap: 20px;">
-          <div style="font-size: 11px; letter-spacing: 0.24em; color: #FF4D1C;">02 — THE DOCKET</div>
+          <div style="font-size: 11px; letter-spacing: 0.24em; color: #FF4D1C;">02 · THE DOCKET</div>
           <div style="font-family: 'Instrument Serif', serif; font-size: clamp(26px, 3vw, 40px); line-height: 1;">Live verdict ledger</div>
         </div>
         <div style="display: flex; gap: 14px; font-size: 10px; letter-spacing: 0.14em; flex-wrap: wrap;">
@@ -165,7 +165,7 @@
               <div style="display: flex; align-items: center; gap: 16px; flex-wrap: wrap;">
                 <div style="font-size: 11px; letter-spacing: 0.16em; color: rgba(237,232,220,0.5); display: flex; align-items: center; gap: 10px;">
                   <span style="display: inline-block; width: 8px; height: 8px; border: 1px solid rgba(237,232,220,0.5); animation: tf-spin 3s linear infinite;"></span>
-                  AWAITING TRIAL — EVIDENCE NOT YET GATHERED
+                  AWAITING TRIAL · EVIDENCE NOT YET GATHERED
                 </div>
                 <button data-magnetic="1" onClick="{{ c.onVerify }}" style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; font-weight: 600; letter-spacing: 0.16em; color: #FF4D1C; background: transparent; border: 1px solid #FF4D1C; padding: 12px 22px; cursor: pointer; transition: all 0.2s;" style-hover="background: #FF4D1C; color: #0B0A08;">⟡ RUN VERIFICATION</button>
               </div>
@@ -202,7 +202,7 @@
 
   <!-- ================= FOOTER ================= -->
   <footer style="position: relative; z-index: 1; border-top: 1px solid rgba(237,232,220,0.14); padding: 24px clamp(16px, 4vw, 56px); display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; font-size: 10px; letter-spacing: 0.18em; color: rgba(237,232,220,0.4);">
-    <span>TRUTHFEED © 2026 — THE MACHINE TRIBUNAL</span>
+    <span>TRUTHFEED © 2026 · THE MACHINE TRIBUNAL</span>
     <span>ENCLAVE ATTESTATION: 0x9F2C…D41A</span>
     <span>{{ blockReadout }}</span>
   </footer>
@@ -260,7 +260,7 @@
                 </div>
               </div>
               <div style="font-size: 12px; line-height: 1.8; color: rgba(237,232,220,0.7); max-width: 560px; text-align: center;">{{ pipelineReasoning }}</div>
-              <div style="font-size: 10px; letter-spacing: 0.2em; color: {{ pipelineColor }}; border-top: 1px solid rgba(237,232,220,0.15); border-bottom: 1px solid rgba(237,232,220,0.15); padding: 12px 24px; animation: tf-carve 1.2s ease-out both; animation-delay: 0.6s;">⛓ SEALED PERMANENTLY — {{ pipelineSealTag }}</div>
+              <div style="font-size: 10px; letter-spacing: 0.2em; color: {{ pipelineColor }}; border-top: 1px solid rgba(237,232,220,0.15); border-bottom: 1px solid rgba(237,232,220,0.15); padding: 12px 24px; animation: tf-carve 1.2s ease-out both; animation-delay: 0.6s;">⛓ SEALED PERMANENTLY · {{ pipelineSealTag }}</div>
               <button data-magnetic="1" onClick="{{ closePipeline }}" style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; font-weight: 600; letter-spacing: 0.16em; color: #0B0A08; background: #EDE8DC; border: none; padding: 14px 30px; cursor: pointer; transition: background 0.2s;" style-hover="background: #FF4D1C;">RETURN TO DOCKET</button>
             </div>
           </sc-if>
@@ -284,7 +284,7 @@ class Component extends DCLogic {
   constructor(props) {
     super(props);
     // ============================================================
-    // SINGLE DATA MODEL — swap this for live chain data later.
+    // SINGLE DATA MODEL · swap this for live chain data later.
     // Claim: { id, claimText, verdict, confidence, reasoning,
     //          sourceUrl, citations[], status, author }
     // verdict: 'TRUE' | 'FALSE' | 'MISLEADING' | 'UNVERIFIABLE' | null

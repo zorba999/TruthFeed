@@ -2,9 +2,9 @@
 
 # ⟡ TruthFeed
 
-### The Machine Tribunal — an on-chain, TEE-attested fact-checker on Ritual Chain
+### The Machine Tribunal - an on-chain, TEE-attested fact-checker on Ritual Chain
 
-*Submit a rumor, a headline, a "fact." The machine hunts real evidence, deliberates inside a sealed TEE, and carves its verdict onto the chain — permanently. Nobody can bribe it. Nobody can bury it.*
+*Submit a rumor, a headline, a "fact." The machine hunts real evidence, deliberates inside a sealed TEE, and carves its verdict onto the chain - permanently. Nobody can bribe it. Nobody can bury it.*
 
 ![Ritual Chain](https://img.shields.io/badge/chain-Ritual%201979-FF4D1C?style=flat-square)
 ![Solidity](https://img.shields.io/badge/Solidity-0.8.24-363636?style=flat-square&logo=solidity)
@@ -12,7 +12,7 @@
 ![GSAP](https://img.shields.io/badge/UI-GSAP%203.12-88CE02?style=flat-square)
 ![status](https://img.shields.io/badge/status-live%20on%20testnet-6FE3A0?style=flat-square)
 
-<img src="docs/preview.webp" alt="TruthFeed — The Machine Tribunal" width="720" />
+<img src="docs/preview.webp" alt="TruthFeed - The Machine Tribunal" width="720" />
 
 </div>
 
@@ -22,7 +22,7 @@
 
 **TruthFeed** fact-checks a claim end-to-end **on-chain**. A claim is filed, real-world
 evidence is pulled from a public source with Ritual's **HTTP precompile**, and a verdict
-is rendered by the on-chain **LLM precompile** — both executed inside a **TEE (Trusted
+is rendered by the on-chain **LLM precompile** - both executed inside a **TEE (Trusted
 Execution Environment)**. The evidence and the verdict are written to the chain, so the
 judgment can't be silently forged, edited, or re-biased.
 
@@ -78,10 +78,10 @@ Verified end-to-end on-chain, e.g. *"The Eiffel Tower is located in Berlin"* →
 
 ## Tech stack
 
-- **Contract** — Solidity `0.8.24`, compiled with `solc` (`viaIR`, shanghai EVM).
-- **Chain layer** — [viem](https://viem.sh) for encoding precompile calls, deploying, and driving the pipeline.
-- **Frontend** — a single, dependency-free page: an **EIP-6963** wallet adapter, live
-  on-chain reads, and a cinematic **GSAP** verification pipeline — no build step, no framework runtime.
+- **Contract** - Solidity `0.8.24`, compiled with `solc` (`viaIR`, shanghai EVM).
+- **Chain layer** - [viem](https://viem.sh) for encoding precompile calls, deploying, and driving the pipeline.
+- **Frontend** - a single, dependency-free page: an **EIP-6963** wallet adapter, live
+  on-chain reads, and a cinematic **GSAP** verification pipeline - no build step, no framework runtime.
 
 ---
 
@@ -108,7 +108,7 @@ Create a `.env` (git-ignored) from this template:
 ```bash
 RITUAL_RPC_URL=https://rpc.ritualfoundation.org
 CHAIN_ID=1979
-PRIVATE_KEY=0x...            # testnet key only — faucet RITUAL, no real value
+PRIVATE_KEY=0x...            # testnet key only - faucet RITUAL, no real value
 TRUTHFEED_ADDRESS=0x...      # filled in after deploy
 ```
 
@@ -129,7 +129,7 @@ node scripts/interact.mjs read                # print the full docket
 ## Project structure
 
 ```
-contracts/TruthFeed.sol   on-chain verifier — calls the HTTP + LLM precompiles
+contracts/TruthFeed.sol   on-chain verifier - calls the HTTP + LLM precompiles
 scripts/lib.mjs           chain config, ABIs, TEE executor selection (viem)
 scripts/compile.mjs       solc compile (viaIR, shanghai) → build/TruthFeed.json
 scripts/deploy.mjs        deploy + confirm on-chain code
@@ -144,10 +144,10 @@ Design/                   original design source (Claude Design / dc-runtime)
 ## Engineering notes (real Ritual constraints)
 
 - **RitualWallet needs an active _lock_, not just a balance.** Async calls are rejected
-  with `insufficient lock duration` if `lockUntil` has passed — funds present or not. The
+  with `insufficient lock duration` if `lockUntil` has passed - funds present or not. The
   deposit helper re-extends the lock on every run.
 - **One async precompile per transaction** → evidence-fetch and judging are two txs.
-- **Sender lock** — one pending async job per account; the pipeline runs sequentially.
+- **Sender lock** - one pending async job per account; the pipeline runs sequentially.
 - **HTTP responses cap at ~5KB** → the Wikipedia search uses `limit=1`, and a `User-Agent`
   header is passed through the contract.
 - **`viaIR` compilation** is required (stack-too-deep), targeting the **shanghai** EVM.
@@ -164,5 +164,5 @@ Design/                   original design source (Claude Design / dc-runtime)
 ---
 
 <div align="center">
-<sub>The verdict is not an opinion. It is a record. — carved on-chain, block after block.</sub>
+<sub>The verdict is not an opinion. It is a record. - carved on-chain, block after block.</sub>
 </div>
